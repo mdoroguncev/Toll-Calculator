@@ -10,3 +10,5 @@ data/
 # IDE
 .idea/
 .vscode/
+
+.env
