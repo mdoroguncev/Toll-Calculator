@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: tolling
+    folder: Toll Calculator
+    type: file
+    allowUiUpdates: true
+    options:
+      path: $GF_PATHS_PROVISIONING/dashboards

@@ -1,0 +1,12 @@
+# build output
+bin/
+
+# Prometheus TSDB data
+data/
+
+# Grafana runtime data (sqlite db, sessions)
+.config/grafana/data/
+
+# IDE
+.idea/
+.vscode/
