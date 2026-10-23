@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/mdoroguncev/toll-calculator/types"
 	"github.com/gorilla/websocket"
+	"github.com/mdoroguncev/toll-calculator/types"
 )
 
 const wsEndpoint = "ws://127.0.0.1:30000/ws"
@@ -18,7 +18,7 @@ func genLatLong() (float64, float64) {
 }
 
 func genCord() float64 {
-	n := float64(rand.Intn(100) + 1)
+	n := float64(rand.Intn(180) - 90)
 	f := rand.Float64()
 
 	return n + f

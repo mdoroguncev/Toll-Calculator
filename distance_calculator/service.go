@@ -10,23 +10,55 @@ type CalculatorServicer interface {
 	CalculateDistance(types.OBUData) (float64, error)
 }
 
+type Point struct {
+	Lat  float64
+	Long float64
+}
+
 type CalcService struct {
-	prevPoint []float64
+	prevPoint map[int]Point
 }
 
 func NewCalcService() CalculatorServicer {
-	return &CalcService{}
+	return &CalcService{
+		prevPoint: make(map[int]Point),
+	}
 }
 
 func (s *CalcService) CalculateDistance(data types.OBUData) (float64, error) {
-	distance := 0.0
-	if len(s.prevPoint) > 0 {
-		distance = calculateDistance(s.prevPoint[0], s.prevPoint[1], data.Lat, data.Long)
+	cur := Point{Lat: data.Lat, Long: data.Long}
+
+	prev, ok := s.prevPoint[data.OBUID]
+
+	s.prevPoint[data.OBUID] = cur
+
+	if !ok {
+		return 0.0, nil
 	}
-	s.prevPoint = []float64{data.Lat, data.Long}
+
+	distance := haversine(prev, cur)
+
 	return distance, nil
 }
 
-func calculateDistance(x1, y1, x2, y2 float64) float64 {
-	return math.Sqrt(math.Pow(x2-x1, 2) + math.Pow(y2-y1, 2))
+func haversine(a, b Point) float64 {
+	const earthRadiusKm = 6371.0
+
+	// Переводим градусы в радианы
+	lat1 := a.Lat * math.Pi / 180
+	lat2 := b.Lat * math.Pi / 180
+	dLat := (b.Lat - a.Lat) * math.Pi / 180
+	dLon := (b.Long - a.Long) * math.Pi / 180
+
+	// Формула гаверсинуса
+	sinLat := math.Sin(dLat / 2)
+	sinLon := math.Sin(dLon / 2)
+
+	h := sinLat*sinLat + math.Cos(lat1)*math.Cos(lat2)*sinLon*sinLon
+
+	// Угол между точками из центра Земли (в радианах)
+	c := 2 * math.Asin(math.Sqrt(h))
+
+	// Умножаем на радиус Земли — получаем расстояние в км
+	return earthRadiusKm * c
 }
