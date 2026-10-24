@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/mdoroguncev/toll-calculator/types"
 	"github.com/joho/godotenv"
+	"github.com/mdoroguncev/toll-calculator/types"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 )

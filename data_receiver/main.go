@@ -7,8 +7,8 @@ import (
 	"math/rand/v2"
 	"net/http"
 
-	"github.com/mdoroguncev/toll-calculator/types"
 	"github.com/gorilla/websocket"
+	"github.com/mdoroguncev/toll-calculator/types"
 )
 
 func main() {

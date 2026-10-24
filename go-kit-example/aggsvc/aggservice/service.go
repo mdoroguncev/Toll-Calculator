@@ -3,8 +3,8 @@ package aggservice
 import (
 	"context"
 
-	"github.com/mdoroguncev/toll-calculator/types"
 	"github.com/go-kit/log"
+	"github.com/mdoroguncev/toll-calculator/types"
 )
 
 const basePrice = 3.15

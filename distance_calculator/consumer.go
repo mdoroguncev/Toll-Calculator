@@ -60,7 +60,7 @@ func (c *KafkaConsumer) readMessageLoop() {
 		if err := json.Unmarshal(msg.Value, &data); err != nil {
 			logrus.Errorf("JSON serialization error %s", err)
 			logrus.WithFields(logrus.Fields{
-				"error": err,
+				"error":     err,
 				"requestID": data.RequestID,
 			})
 			continue
@@ -74,7 +74,6 @@ func (c *KafkaConsumer) readMessageLoop() {
 			Value: distance,
 			Unix:  int64(time.Now().UnixNano()),
 			ObuID: int32(data.OBUID),
-			
 		}
 		if err := c.aggClient.Aggregate(context.Background(), req); err != nil {
 			logrus.Errorf("aggregate error: %v", err)

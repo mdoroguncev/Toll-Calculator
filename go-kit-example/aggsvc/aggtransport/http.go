@@ -14,14 +14,14 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/mdoroguncev/toll-calculator/go-kit-example/aggsvc/aggendpoint"
-	"github.com/mdoroguncev/toll-calculator/go-kit-example/aggsvc/aggservice"
 	"github.com/go-kit/kit/circuitbreaker"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/ratelimit"
 	"github.com/go-kit/kit/transport"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/go-kit/log"
+	"github.com/mdoroguncev/toll-calculator/go-kit-example/aggsvc/aggendpoint"
+	"github.com/mdoroguncev/toll-calculator/go-kit-example/aggsvc/aggservice"
 	"github.com/sony/gobreaker"
 )
 

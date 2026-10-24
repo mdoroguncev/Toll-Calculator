@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-kit/log"
 	"github.com/mdoroguncev/toll-calculator/go-kit-example/aggsvc/aggendpoint"
 	"github.com/mdoroguncev/toll-calculator/go-kit-example/aggsvc/aggservice"
 	"github.com/mdoroguncev/toll-calculator/go-kit-example/aggsvc/aggtransport"
-	"github.com/go-kit/log"
 )
 
 func main() {
