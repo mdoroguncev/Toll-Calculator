@@ -16,7 +16,7 @@ type apiFunc func(w http.ResponseWriter, r *http.Request) error
 
 func main() {
 	listenAddr := flag.String("listenAddr", ":6000", "the listen addres of the http server")
-	aggregatorServiceAddr := flag.String("aggServiceAddr", "http://localhost:3000", "the listen addres of the aggregator service")
+	aggregatorServiceAddr := flag.String("aggServiceAddr", "http://localhost:4000", "the listen addres of the aggregator service")
 	flag.Parse()
 
 	var (
