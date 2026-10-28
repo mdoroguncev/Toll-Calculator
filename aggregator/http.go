@@ -35,6 +35,8 @@ func makeHTTPHandlerFunc(fn HTTPFunc) http.HandlerFunc {
 		if err := fn(w, r); err != nil {
 			if apiErr, ok := err.(APIError); ok {
 				writeJSON(w, apiErr.Code, map[string]string{"error": apiErr.Error()})
+			} else {
+				writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
 			}
 		}
 	}
