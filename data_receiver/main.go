@@ -17,13 +17,11 @@ func main() {
 		log.Fatal(err)
 	}
 	http.HandleFunc("/ws", recv.HandleWS)
-	http.ListenAndServe(":30000", nil)
+	log.Fatal(http.ListenAndServe(":30000", nil))
 }
 
 type DataReceiver struct {
-	msgch chan types.OBUData
-	conn  *websocket.Conn
-	prod  DataProducer
+	prod DataProducer
 }
 
 func NewDataReceiver() (*DataReceiver, error) {
@@ -39,8 +37,7 @@ func NewDataReceiver() (*DataReceiver, error) {
 
 	p = NewLogMiddleware(p)
 	return &DataReceiver{
-		msgch: make(chan types.OBUData, 128),
-		prod:  p,
+		prod: p,
 	}, nil
 }
 
@@ -55,21 +52,21 @@ func (dr *DataReceiver) HandleWS(w http.ResponseWriter, r *http.Request) {
 	}
 	conn, err := u.Upgrade(w, r, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("error: %v", err)
+		return
 	}
 
-	dr.conn = conn
-
-	go dr.wsReceiverLoop()
+	go dr.wsReceiverLoop(conn)
 }
 
-func (dr *DataReceiver) wsReceiverLoop() {
+func (dr *DataReceiver) wsReceiverLoop(conn *websocket.Conn) {
+	defer conn.Close()
 	fmt.Println("New OBU connected!")
 	for {
 		var data types.OBUData
-		if err := dr.conn.ReadJSON(&data); err != nil {
+		if err := conn.ReadJSON(&data); err != nil {
 			log.Println("read error: ", err)
-			continue
+			return
 		}
 		data.RequestID = rand.IntN(math.MaxInt)
 		if err := dr.produceData(data); err != nil {
