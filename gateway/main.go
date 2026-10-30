@@ -1,16 +1,26 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/mdoroguncev/toll-calculator/aggregator/client"
 	"github.com/sirupsen/logrus"
 )
+
+type APIError struct {
+	Code int
+	Err  error
+}
+
+func (e APIError) Error() string {
+	return e.Err.Error()
+}
 
 type apiFunc func(w http.ResponseWriter, r *http.Request) error
 
@@ -20,13 +30,20 @@ func main() {
 	flag.Parse()
 
 	var (
-		client     = client.NewHTTPClient(*aggregatorServiceAddr) //endpoint for the aggregator service
-		invHandler = NewInvoiceHandler(client)
+		aggClient = client.NewHTTPClient(*aggregatorServiceAddr) //endpoint for the aggregator service
 	)
-	http.HandleFunc("/invoice", makeAPIFunc(invHandler.handleGetInvoice))
 	logrus.Infof("gateway http is running on port %s", *listenAddr)
-	log.Fatal(http.ListenAndServe(*listenAddr, nil))
+	log.Fatal(http.ListenAndServe(*listenAddr, newRouter(aggClient)))
 
+}
+
+func newRouter(c client.Client) http.Handler {
+	invHandler := NewInvoiceHandler(c)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /invoice/{obuID}", makeAPIFunc(invHandler.handleGetInvoice))
+
+	return mux
 }
 
 type InvoiceHandler struct {
@@ -40,8 +57,12 @@ func NewInvoiceHandler(client client.Client) *InvoiceHandler {
 }
 
 func (h *InvoiceHandler) handleGetInvoice(w http.ResponseWriter, r *http.Request) error {
+	intID, err := strconv.Atoi(r.PathValue("obuID"))
+	if err != nil {
+		return APIError{Code: http.StatusBadRequest, Err: fmt.Errorf("invalid obu id %q", r.PathValue("obuID"))}
+	}
 
-	inv, err := h.client.GetInvoice(context.Background(), 1927769697)
+	inv, err := h.client.GetInvoice(r.Context(), intID)
 	if err != nil {
 		return err
 	}
@@ -56,14 +77,20 @@ func writeJSON(w http.ResponseWriter, code int, v any) error {
 
 func makeAPIFunc(fn apiFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var err error
 		defer func(start time.Time) {
 			logrus.WithFields(logrus.Fields{
 				"took": time.Since(start),
 				"uri":  r.RequestURI,
+				"err":  err,
 			}).Info("REQ: ")
 		}(time.Now())
-		if err := fn(w, r); err != nil {
-			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		if err = fn(w, r); err != nil {
+			if apiErr, ok := err.(APIError); ok {
+				writeJSON(w, apiErr.Code, map[string]string{"error": apiErr.Error()})
+			} else {
+				writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+			}
 		}
 	}
 }
