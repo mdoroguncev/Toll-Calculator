@@ -1,4 +1,10 @@
-.PHONY: obu receiver calculator agg invoicer proto gate prometheus grafana
+.PHONY: up down obu receiver calculator agg invoicer proto gate
+
+up:
+	@docker compose up -d
+
+down:
+	@docker compose down
 
 obu:
 	@go build -o bin/obu obu/main.go
@@ -22,9 +28,3 @@ proto:
 gate:
 	@go build -o bin/gate gateway/main.go
 	@./bin/gate
-
-prometheus:
-	@../prometheus/prometheus --config.file=$(CURDIR)/.config/prometheus.yml --web.listen-address=:9091
-
-grafana:
-	@GF_PATHS_PROVISIONING=$(CURDIR)/.config/grafana/provisioning GF_PATHS_DATA=$(CURDIR)/.config/grafana/data ../grafana/bin/grafana server --homepath $(abspath ../grafana)

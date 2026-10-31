@@ -1,9 +1,36 @@
 # toll-calculator
 
-Start Kafka and Zookeeper:
+## Infrastructure
+
+Kafka (KRaft mode, no Zookeeper), Kafka UI, Prometheus and Grafana run in Docker:
 ```
-docker-compose up
+make up     # docker compose up -d
+make down   # docker compose down
 ```
+
+| Service    | Address                | Notes                                         |
+|------------|------------------------|-----------------------------------------------|
+| Kafka      | `localhost:9092`       | used by the Go services                       |
+| Kafka UI   | http://localhost:8090  | topics, partitions, messages                  |
+| Prometheus | http://localhost:9091  | scrapes the aggregator on `localhost:4000`    |
+| Grafana    | http://localhost:3030  | login `admin` / `admin`                       |
+
+The Go services run on the host:
+```
+cp .env.example .env
+make agg
+make calculator
+make receiver
+make obu
+make gate
+```
+
+Prometheus scrapes the aggregator through `host.docker.internal:4000` (see `.config/prometheus.yml`),
+so start the aggregator to see its target as UP in http://localhost:9091/targets.
+
+Grafana is provisioned from `.config/grafana/provisioning`: the Prometheus datasource and the
+"Aggregator" dashboard (Dashboards → Toll Calculator). After logging in Grafana asks to change the
+password — you can press **Skip**.
 
 ## Installing protobuf compiler (protoc compiler)
 
@@ -43,70 +70,3 @@ go get google.golang.org/protobuf
 ```
 go get google.golang.org/grpc
 ```
-
-
-## Installing Prometheus
-Download the Prometheus binary next to the project (into `../prometheus`)
-```
-cd ..
-V=3.15.0
-curl -LO https://github.com/prometheus/prometheus/releases/download/v$V/prometheus-$V.linux-amd64.tar.gz
-mkdir -p prometheus
-tar -xzf prometheus-$V.linux-amd64.tar.gz -C prometheus --strip-components=1
-rm prometheus-$V.linux-amd64.tar.gz
-cd Toll-Calculator
-```
-
-The config lives in `.config/prometheus.yml` and scrapes the aggregator metrics from `localhost:4000/metrics`.
-Check the config
-```
-../prometheus/promtool check config ./.config/prometheus.yml
-```
-
-Run Prometheus (from the project root, after `make agg`)
-```
-../prometheus/prometheus --config.file=./.config/prometheus.yml --web.listen-address=:9091
-```
-
-Or simply
-```
-make prometheus
-```
-
-The UI is available at http://localhost:9091. Example query:
-```
-go_goroutines{job="aggregator"}
-```
-
-Installing prometheus golang client
-```
-go get github.com/prometheus/client_golang/prometheus
-```
-
-## Installing Grafana
-Download the Grafana binary next to the project (into `../grafana`)
-```
-cd ..
-V=13.2.4
-curl -LO https://dl.grafana.com/oss/release/grafana-$V.linux-amd64.tar.gz
-mkdir -p grafana
-tar -xzf grafana-$V.linux-amd64.tar.gz -C grafana --strip-components=1
-rm grafana-$V.linux-amd64.tar.gz
-cd Toll-Calculator
-```
-
-The Prometheus datasource (`http://localhost:9091`) is provisioned from `.config/grafana/provisioning`.
-
-Run Grafana (from the project root, after Prometheus is running)
-```
-GF_PATHS_PROVISIONING=$PWD/.config/grafana/provisioning ../grafana/bin/grafana server --homepath "$(realpath ../grafana)"
-```
-
-Or simply
-```
-make grafana
-```
-
-The UI is available at http://localhost:3000.
-This is a login page, not a registration: username `admin`, password `admin`. After logging in Grafana asks to change the password — you can press **Skip**.
-The "Aggregator" dashboard (`.config/grafana/provisioning/dashboards/aggregator.json`) is under Dashboards → Toll Calculator.
