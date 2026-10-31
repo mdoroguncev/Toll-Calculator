@@ -2,7 +2,6 @@ services:
   # Kafka в режиме KRaft: один процесс работает и брокером, и контроллером (вместо Zookeeper)
   kafka:
     image: apache/kafka:4.1.0
-    container_name: kafka
     restart: unless-stopped
     ports:
       # Для Go-сервисов, запущенных на вашем компьютере (bootstrap.servers: localhost)
@@ -37,7 +36,6 @@ services:
   # Веб-интерфейс для Kafka: топики, партиции, сообщения
   kafka-ui:
     image: kafbat/kafka-ui:v1.3.0
-    container_name: kafka-ui
     restart: unless-stopped
     depends_on:
       - kafka
@@ -49,7 +47,6 @@ services:
 
   prometheus:
     image: prom/prometheus:v3.15.0
-    container_name: prometheus
     restart: unless-stopped
     ports:
       - "9091:9090"
@@ -62,7 +59,6 @@ services:
 
   grafana:
     image: grafana/grafana:13.2.4
-    container_name: grafana
     restart: unless-stopped
     depends_on:
       - prometheus
