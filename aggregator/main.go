@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -15,6 +15,8 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "aggregator")
+	slog.SetDefault(logger)
 	if err := godotenv.Load(); err != nil {
 		log.Fatal(err)
 	}
@@ -33,7 +35,7 @@ func main() {
 }
 
 func makeGRPCTransport(listenAddr string, svc Aggregator) error {
-	fmt.Println("GRPC running on port ", listenAddr)
+	slog.Info("grpc server started", "addr", listenAddr)
 	// make a tcp listener
 	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
@@ -59,7 +61,7 @@ func makeHTTPTransport(listenAddr string, svc Aggregator) error {
 	http.HandleFunc("/aggregate", aggregateHandler)
 	http.Handle("/metrics", promhttp.Handler())
 
-	fmt.Println("HTTP running on port ", listenAddr)
+	slog.Info("http server started", "addr", listenAddr)
 	return http.ListenAndServe(listenAddr, nil)
 }
 

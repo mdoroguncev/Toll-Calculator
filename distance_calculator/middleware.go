@@ -1,10 +1,10 @@
 package main
 
 import (
+	"log/slog"
 	"time"
 
 	"github.com/mdoroguncev/toll-calculator/types"
-	"github.com/sirupsen/logrus"
 )
 
 type LogMiddleware struct {
@@ -19,11 +19,11 @@ func NewLogMiddleware(next CalculatorServicer) CalculatorServicer {
 
 func (m *LogMiddleware) CalculateDistance(data types.OBUData) (dist float64, err error) {
 	defer func(start time.Time) {
-		logrus.WithFields(logrus.Fields{
-			"took": time.Since(start),
-			"err":  err,
-			"dist": dist,
-		}).Info("calculate distance")
+		slog.Info("calculate distance",
+			"took", time.Since(start),
+			"err", err,
+			"dist", dist,
+		)
 	}(time.Now())
 
 	dist, err = m.next.CalculateDistance(data)

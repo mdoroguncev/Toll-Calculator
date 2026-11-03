@@ -1,12 +1,12 @@
 package main
 
 import (
+	"log/slog"
 	"time"
 
 	"github.com/mdoroguncev/toll-calculator/types"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/sirupsen/logrus"
 )
 
 type MetricsMiddleware struct {
@@ -97,10 +97,7 @@ func NewLogMiddleware(next Aggregator) Aggregator {
 
 func (m *LogMiddleware) AggregateDistance(distance types.Distance) (err error) {
 	defer func(start time.Time) {
-		logrus.WithFields(logrus.Fields{
-			"took": time.Since(start),
-			"err":  err,
-		}).Info("AggregateDistance")
+		slog.Info("AggregateDistance", "took", time.Since(start), "err", err)
 	}(time.Now())
 
 	err = m.next.AggregateDistance(distance)
@@ -117,13 +114,14 @@ func (m *LogMiddleware) CalculateInvoice(obuID int) (inv *types.Invoice, err err
 			distance = inv.TotalDistance
 			amount = inv.TotalAmount
 		}
-		logrus.WithFields(logrus.Fields{
-			"took":     time.Since(start),
-			"err":      err,
-			"obuID":    obuID,
-			"distance": distance,
-			"amount":   amount,
-		}).Info("CalculateInvoice")
+
+		slog.Info("CalculateInvoice",
+			"took", time.Since(start),
+			"err", err,
+			"obuID", obuID,
+			"distance", distance,
+			"amount", amount,
+		)
 	}(time.Now())
 
 	inv, err = m.next.CalculateInvoice(obuID)

@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"log/slog"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -25,6 +27,8 @@ func genCord() float64 {
 }
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "obu")
+	slog.SetDefault(logger)
 	obuIDs := generateOBUIDs(20)
 	conn, _, err := websocket.DefaultDialer.Dial(wsEndpoint, nil)
 	if err != nil {

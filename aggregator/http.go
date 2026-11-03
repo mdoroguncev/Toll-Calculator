@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/mdoroguncev/toll-calculator/types"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/sirupsen/logrus"
 )
 
 type HTTPFunc func(http.ResponseWriter, *http.Request) error
@@ -69,11 +69,7 @@ func (h *HTTPMetricHandler) instrument(next HTTPFunc) HTTPFunc {
 		var err error
 		defer func(start time.Time) {
 			latency := time.Since(start).Seconds()
-			logrus.WithFields(logrus.Fields{
-				"latency": latency,
-				"request": r.RequestURI,
-				"err":     err,
-			}).Info()
+			slog.Info("http request", "latency", latency, "request", r.RequestURI, "err", err)
 			h.reqLatency.Observe(latency)
 			h.reqCounter.Inc()
 			if err != nil {

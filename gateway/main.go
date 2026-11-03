@@ -5,12 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/mdoroguncev/toll-calculator/aggregator/client"
-	"github.com/sirupsen/logrus"
 )
 
 type APIError struct {
@@ -25,6 +26,8 @@ func (e APIError) Error() string {
 type apiFunc func(w http.ResponseWriter, r *http.Request) error
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "gateway")
+	slog.SetDefault(logger)
 	listenAddr := flag.String("listenAddr", ":6000", "the listen addres of the http server")
 	aggregatorServiceAddr := flag.String("aggServiceAddr", "http://localhost:4000", "the listen addres of the aggregator service")
 	flag.Parse()
@@ -32,7 +35,7 @@ func main() {
 	var (
 		aggClient = client.NewHTTPClient(*aggregatorServiceAddr) //endpoint for the aggregator service
 	)
-	logrus.Infof("gateway http is running on port %s", *listenAddr)
+	slog.Info("gateway http is running on port", "addr", *listenAddr)
 	log.Fatal(http.ListenAndServe(*listenAddr, newRouter(aggClient)))
 
 }
@@ -79,11 +82,7 @@ func makeAPIFunc(fn apiFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		defer func(start time.Time) {
-			logrus.WithFields(logrus.Fields{
-				"took": time.Since(start),
-				"uri":  r.RequestURI,
-				"err":  err,
-			}).Info("REQ: ")
+			slog.Info("REQ:", "took", time.Since(start), "uri", r.RequestURI, "err", err)
 		}(time.Now())
 		if err = fn(w, r); err != nil {
 			if apiErr, ok := err.(APIError); ok {

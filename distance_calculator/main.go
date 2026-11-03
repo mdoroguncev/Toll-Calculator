@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"log/slog"
+	"os"
 
 	"github.com/mdoroguncev/toll-calculator/aggregator/client"
 )
@@ -16,6 +18,8 @@ const (
 )
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "distance_calculator")
+	slog.SetDefault(logger)
 	var (
 		err error
 		svc CalculatorServicer

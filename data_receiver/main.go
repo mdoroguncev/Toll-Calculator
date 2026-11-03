@@ -1,17 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"log/slog"
 	"math"
 	"math/rand/v2"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/websocket"
 	"github.com/mdoroguncev/toll-calculator/types"
 )
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "data_receiver")
+	slog.SetDefault(logger)
 	recv, err := NewDataReceiver()
 	if err != nil {
 		log.Fatal(err)
@@ -52,7 +55,7 @@ func (dr *DataReceiver) HandleWS(w http.ResponseWriter, r *http.Request) {
 	}
 	conn, err := u.Upgrade(w, r, nil)
 	if err != nil {
-		log.Printf("error: %v", err)
+		slog.Error("websocket upgrade failed", "err", err)
 		return
 	}
 
@@ -61,16 +64,20 @@ func (dr *DataReceiver) HandleWS(w http.ResponseWriter, r *http.Request) {
 
 func (dr *DataReceiver) wsReceiverLoop(conn *websocket.Conn) {
 	defer conn.Close()
-	fmt.Println("New OBU connected!")
+	slog.Info("New OBU connected", "remote", conn.RemoteAddr())
 	for {
 		var data types.OBUData
 		if err := conn.ReadJSON(&data); err != nil {
-			log.Println("read error: ", err)
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseNormalClosure) {
+				slog.Error("unexpected close error", "err", err)
+			} else {
+				slog.Info("obu disconnected")
+			}
 			return
 		}
 		data.RequestID = rand.IntN(math.MaxInt)
 		if err := dr.produceData(data); err != nil {
-			fmt.Println("kafka produce error: ", err)
+			slog.Error("kafka produce error", "err", err)
 		}
 	}
 }

@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"github.com/mdoroguncev/toll-calculator/types"
-	"github.com/sirupsen/logrus"
 )
 
 type HTTPClient struct {
@@ -24,7 +24,7 @@ func NewHTTPClient(endpoint string) *HTTPClient {
 
 func (c *HTTPClient) GetInvoice(ctx context.Context, id int) (*types.Invoice, error) {
 	endpoint := fmt.Sprintf("%s/%s?obu=%d", c.Endpoint, "invoice", id)
-	logrus.Infof("requesting get invoice -> %s", endpoint)
+	slog.Info("requesting get invoice", "endpoint", endpoint)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
