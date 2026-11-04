@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/mdoroguncev/toll-calculator/aggregator/client"
+	"github.com/mdoroguncev/toll-calculator/internal/config"
 )
 
 type APIError struct {
@@ -26,10 +27,14 @@ func (e APIError) Error() string {
 type apiFunc func(w http.ResponseWriter, r *http.Request) error
 
 func main() {
+	if err := config.LoadDotEnv(); err != nil {
+		log.Fatal(err)
+	}
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "gateway")
 	slog.SetDefault(logger)
-	listenAddr := flag.String("listenAddr", ":6000", "the listen addres of the http server")
-	aggregatorServiceAddr := flag.String("aggServiceAddr", "http://localhost:4000", "the listen addres of the aggregator service")
+	// Flags override environment variables, environment variables override the defaults.
+	listenAddr := flag.String("listenAddr", config.Get("GATEWAY_ADDR", ":6000"), "the listen addres of the http server")
+	aggregatorServiceAddr := flag.String("aggServiceAddr", config.Get("AGG_HTTP_URL", "http://localhost:4000"), "the listen addres of the aggregator service")
 	flag.Parse()
 
 	var (

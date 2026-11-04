@@ -18,10 +18,10 @@ type KafkaConsumer struct {
 	aggClient   client.Client
 }
 
-func NewKafkaConsumer(topic string, svc CalculatorServicer, aggClient client.Client) (*KafkaConsumer, error) {
+func NewKafkaConsumer(brokers, topic, group string, svc CalculatorServicer, aggClient client.Client) (*KafkaConsumer, error) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost",
-		"group.id":          "myGroup",
+		"bootstrap.servers": brokers,
+		"group.id":          group,
 		"auto.offset.reset": "earliest",
 	})
 

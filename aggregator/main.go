@@ -8,23 +8,23 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/mdoroguncev/toll-calculator/internal/config"
 	"github.com/mdoroguncev/toll-calculator/types"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "aggregator")
-	slog.SetDefault(logger)
-	if err := godotenv.Load(); err != nil {
+	if err := config.LoadDotEnv(); err != nil {
 		log.Fatal(err)
 	}
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "aggregator")
+	slog.SetDefault(logger)
 	var (
-		store          = makeStore()
+		store          = makeStore(config.Get("AGG_STORE_TYPE", "memory"))
 		svc            = NewInvoiceAggregator(store)
-		GRPCListenAddr = os.Getenv("AGG_GRPC_ENDPOINT")
-		HTTPListenAddr = os.Getenv("AGG_HTTP_ENDPOINT")
+		GRPCListenAddr = config.Get("AGG_GRPC_ENDPOINT", ":3001")
+		HTTPListenAddr = config.Get("AGG_HTTP_ENDPOINT", ":4000")
 	)
 	svc = NewMetricsMiddleware(svc)
 	svc = NewLogMiddleware(svc)
@@ -65,8 +65,7 @@ func makeHTTPTransport(listenAddr string, svc Aggregator) error {
 	return http.ListenAndServe(listenAddr, nil)
 }
 
-func makeStore() Storer {
-	storeType := os.Getenv("AGG_STORE_TYPE")
+func makeStore(storeType string) Storer {
 	switch storeType {
 	case "memory":
 		return NewMemoryStore()
