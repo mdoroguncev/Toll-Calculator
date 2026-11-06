@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/mdoroguncev/toll-calculator/aggregator/client"
@@ -32,17 +36,36 @@ func main() {
 	}
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "gateway")
 	slog.SetDefault(logger)
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	// Flags override environment variables, environment variables override the defaults.
-	listenAddr := flag.String("listenAddr", config.Get("GATEWAY_ADDR", ":6000"), "the listen addres of the http server")
 	aggregatorServiceAddr := flag.String("aggServiceAddr", config.Get("AGG_HTTP_URL", "http://localhost:4000"), "the listen addres of the aggregator service")
+	listenAddr := flag.String("listenAddr", config.Get("GATEWAY_ADDR", ":6000"), "the listen addres of the http server")
+
 	flag.Parse()
 
-	var (
-		aggClient = client.NewHTTPClient(*aggregatorServiceAddr) //endpoint for the aggregator service
-	)
+	aggClient := client.NewHTTPClient(*aggregatorServiceAddr) //endpoint for the aggregator service
+	handler := newRouter(aggClient)
+	srv := &http.Server{Addr: *listenAddr, Handler: handler}
 	slog.Info("gateway http is running on port", "addr", *listenAddr)
-	log.Fatal(http.ListenAndServe(*listenAddr, newRouter(aggClient)))
 
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			slog.Error("http server failed", "err", err)
+			os.Exit(1)
+		}
+	}()
+	<-ctx.Done()
+	slog.Info("shutting down server")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		slog.Error("failed to shutdown the server", "err", err)
+	}
 }
 
 func newRouter(c client.Client) http.Handler {
