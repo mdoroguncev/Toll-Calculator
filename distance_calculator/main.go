@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/mdoroguncev/toll-calculator/aggregator/client"
 	"github.com/mdoroguncev/toll-calculator/internal/config"
@@ -43,5 +46,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	kafkaConsumer.Start()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	kafkaConsumer.Start(ctx)
+	if err := kafkaConsumer.Close(); err != nil {
+		slog.Error("failed to close kafka consumer", "err", err)
+	}
+	slog.Info("calculator stopped")
 }

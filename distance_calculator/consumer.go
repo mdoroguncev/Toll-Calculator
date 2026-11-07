@@ -13,7 +13,6 @@ import (
 
 type KafkaConsumer struct {
 	consumer    *kafka.Consumer
-	isRunning   bool
 	calcService CalculatorServicer
 	aggClient   client.Client
 }
@@ -29,8 +28,9 @@ func NewKafkaConsumer(brokers, topic, group string, svc CalculatorServicer, aggC
 		return nil, err
 	}
 
-	c.SubscribeTopics([]string{topic}, nil)
-	// A signal handler or similar could be used to set this to false to break the loop.
+	if err := c.SubscribeTopics([]string{topic}, nil); err != nil {
+		return nil, err
+	}
 
 	return &KafkaConsumer{
 		consumer:    c,
@@ -39,19 +39,21 @@ func NewKafkaConsumer(brokers, topic, group string, svc CalculatorServicer, aggC
 	}, nil
 }
 
-func (c *KafkaConsumer) Close() {
-	c.isRunning = false
+func (c *KafkaConsumer) Close() error {
+	return c.consumer.Close()
 }
 
-func (c *KafkaConsumer) Start() {
+func (c *KafkaConsumer) Start(ctx context.Context) {
 	slog.Info("kafka transport started")
-	c.isRunning = true
-	c.readMessageLoop()
+	c.readMessageLoop(ctx)
 }
 
-func (c *KafkaConsumer) readMessageLoop() {
-	for c.isRunning {
-		msg, err := c.consumer.ReadMessage(-1)
+func (c *KafkaConsumer) readMessageLoop(ctx context.Context) {
+	for ctx.Err() == nil {
+		msg, err := c.consumer.ReadMessage(100 * time.Millisecond)
+		if kerr, ok := err.(kafka.Error); ok && kerr.Code() == kafka.ErrTimedOut {
+			continue
+		}
 		if err != nil {
 			slog.Error("kafka consume error", "err", err)
 			continue
@@ -71,7 +73,7 @@ func (c *KafkaConsumer) readMessageLoop() {
 			Unix:  int64(time.Now().UnixNano()),
 			ObuID: int32(data.OBUID),
 		}
-		if err := c.aggClient.Aggregate(context.Background(), req); err != nil {
+		if err := c.aggClient.Aggregate(ctx, req); err != nil {
 			slog.Error("aggregate error", "err", err)
 			continue
 		}
