@@ -1,12 +1,17 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"log/slog"
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/mdoroguncev/toll-calculator/internal/config"
 	"github.com/mdoroguncev/toll-calculator/types"
@@ -16,10 +21,15 @@ import (
 
 func main() {
 	if err := config.LoadDotEnv(); err != nil {
-		log.Fatal(err)
+		slog.Error("failed to load .env file", "err", err)
+		os.Exit(1)
 	}
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "aggregator")
 	slog.SetDefault(logger)
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	var (
 		store          = makeStore(config.Get("AGG_STORE_TYPE", "memory"))
 		svc            = NewInvoiceAggregator(store)
@@ -28,41 +38,74 @@ func main() {
 	)
 	svc = NewMetricsMiddleware(svc)
 	svc = NewLogMiddleware(svc)
+
+	grpcSrv, ln, err := makeGRPCServer(GRPCListenAddr, svc)
+	if err != nil {
+		slog.Error("grpc listen failed", "err", err)
+		os.Exit(1)
+	}
+	httpSrv := makeHTTPServer(HTTPListenAddr, svc)
+
+	errCh := make(chan error, 2)
 	go func() {
-		log.Fatal(makeGRPCTransport(GRPCListenAddr, svc))
+		if err := httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			errCh <- err
+		}
 	}()
-	log.Fatal(makeHTTPTransport(HTTPListenAddr, svc))
+
+	go func() {
+		if err := grpcSrv.Serve(ln); err != nil {
+			errCh <- err
+		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		slog.Info("shutting down the server")
+	case err = <-errCh:
+		slog.Error("server failed", "error", err)
+		os.Exit(1)
+	}
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	if err := httpSrv.Shutdown(shutdownCtx); err != nil {
+		slog.Error("failed to shutdown the server", "err", err)
+	}
+	grpcSrv.GracefulStop()
+
 }
 
-func makeGRPCTransport(listenAddr string, svc Aggregator) error {
-	slog.Info("grpc server started", "addr", listenAddr)
+func makeGRPCServer(listenAddr string, svc Aggregator) (*grpc.Server, net.Listener, error) {
+	slog.Info("grpc server created", "addr", listenAddr)
 	// make a tcp listener
 	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
-	defer ln.Close()
 	//make a new grpc native server with (options)
 	server := grpc.NewServer([]grpc.ServerOption{}...)
 	//register (our) grpc server implementation to the grpc package
 	types.RegisterAggregatorServer(server, NewAggregatorGRPCServer(svc))
-	return server.Serve(ln)
+	return server, ln, nil
 }
 
-func makeHTTPTransport(listenAddr string, svc Aggregator) error {
+func makeHTTPServer(listenAddr string, svc Aggregator) *http.Server {
 	var (
 		aggMetricHandler = newHTTPMetricHandler("aggregate")
 		invMetricHandler = newHTTPMetricHandler("invoice")
 		aggregateHandler = makeHTTPHandlerFunc(aggMetricHandler.instrument(handleAggregate(svc)))
 		invoiceHandler   = makeHTTPHandlerFunc(invMetricHandler.instrument(handleGetInvoice(svc)))
+		mux              = http.NewServeMux()
 	)
 
-	http.HandleFunc("/invoice", invoiceHandler)
-	http.HandleFunc("/aggregate", aggregateHandler)
-	http.Handle("/metrics", promhttp.Handler())
+	mux.HandleFunc("/invoice", invoiceHandler)
+	mux.HandleFunc("/aggregate", aggregateHandler)
+	mux.Handle("/metrics", promhttp.Handler())
 
-	slog.Info("http server started", "addr", listenAddr)
-	return http.ListenAndServe(listenAddr, nil)
+	slog.Info("http server created", "addr", listenAddr)
+	return &http.Server{Addr: listenAddr, Handler: mux}
 }
 
 func makeStore(storeType string) Storer {
