@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"log/slog"
 	"math/rand"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -29,14 +32,22 @@ func main() {
 	if err := config.LoadDotEnv(); err != nil {
 		log.Fatal(err)
 	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil)).With("service", "obu")
 	slog.SetDefault(logger)
+
 	wsEndpoint := config.Get("OBU_WS_URL", "ws://127.0.0.1:30000/ws")
 	obuIDs := generateOBUIDs(20)
 	conn, _, err := websocket.DefaultDialer.Dial(wsEndpoint, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	ticker := time.NewTicker(sendInterval)
+	defer ticker.Stop()
+
 	for {
 		for i := 0; i < len(obuIDs); i++ {
 			lat, long := genLatLong()
@@ -49,7 +60,14 @@ func main() {
 				log.Fatal(err)
 			}
 		}
-		time.Sleep(sendInterval)
+		select {
+		case <-ctx.Done():
+			slog.Warn(conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")).Error())
+			conn.Close()
+			slog.Info("obu stopped")
+			return
+		case <-ticker.C:
+		}
 	}
 }
 
