@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/mdoroguncev/toll-calculator/internal/aggregator/client"
+	"github.com/mdoroguncev/toll-calculator/internal/calculator"
 	"github.com/mdoroguncev/toll-calculator/internal/config"
 )
 
@@ -27,10 +28,10 @@ func main() {
 	)
 	var (
 		err error
-		svc CalculatorServicer
+		svc calculator.CalculatorServicer
 	)
-	svc = NewCalcService()
-	svc = NewLogMiddleware(svc)
+	svc = calculator.NewCalcService()
+	svc = calculator.NewLogMiddleware(svc)
 
 	htppClient := client.NewHTTPClient(aggregatorEndpoint)
 	//grpcClient, err := client.NewGRPCClient(aggregatorEndpoint)
@@ -38,7 +39,7 @@ func main() {
 	// log.Fatal(err)
 	// }
 
-	kafkaConsumer, err := NewKafkaConsumer(kafkaBrokers, kafkaTopic, kafkaGroup, svc, htppClient)
+	kafkaConsumer, err := calculator.NewKafkaConsumer(kafkaBrokers, kafkaTopic, kafkaGroup, svc, htppClient)
 	if err != nil {
 		log.Fatal(err)
 	}
