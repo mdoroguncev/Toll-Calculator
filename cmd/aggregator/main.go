@@ -35,7 +35,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	svc := aggregator.NewInvoiceAggregator(store)
+	svc := aggregator.NewService(store)
 	svc = aggregator.NewMetricsMiddleware(svc)
 	svc = aggregator.NewLogMiddleware(svc)
 
