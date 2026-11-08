@@ -29,7 +29,7 @@ func TestHaversine(t *testing.T) {
 }
 
 func TestCalculateDistance_MultipleOBUs(t *testing.T) {
-	svc := NewCalcService()
+	svc := NewService()
 
 	got, err := svc.CalculateDistance(types.OBUData{OBUID: 1, Lat: 0, Long: 0})
 	if err != nil {

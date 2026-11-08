@@ -11,13 +11,13 @@ import (
 	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
-type KafkaConsumer struct {
+type Consumer struct {
 	consumer    *kafka.Consumer
-	calcService CalculatorServicer
+	calcService Service
 	aggClient   client.Client
 }
 
-func NewKafkaConsumer(brokers, topic, group string, svc CalculatorServicer, aggClient client.Client) (*KafkaConsumer, error) {
+func NewConsumer(brokers, topic, group string, svc Service, aggClient client.Client) (*Consumer, error) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": brokers,
 		"group.id":          group,
@@ -32,23 +32,23 @@ func NewKafkaConsumer(brokers, topic, group string, svc CalculatorServicer, aggC
 		return nil, err
 	}
 
-	return &KafkaConsumer{
+	return &Consumer{
 		consumer:    c,
 		calcService: svc,
 		aggClient:   aggClient,
 	}, nil
 }
 
-func (c *KafkaConsumer) Close() error {
+func (c *Consumer) Close() error {
 	return c.consumer.Close()
 }
 
-func (c *KafkaConsumer) Start(ctx context.Context) {
+func (c *Consumer) Start(ctx context.Context) {
 	slog.Info("kafka transport started")
 	c.readMessageLoop(ctx)
 }
 
-func (c *KafkaConsumer) readMessageLoop(ctx context.Context) {
+func (c *Consumer) readMessageLoop(ctx context.Context) {
 	for ctx.Err() == nil {
 		msg, err := c.consumer.ReadMessage(100 * time.Millisecond)
 		if kerr, ok := err.(kafka.Error); ok && kerr.Code() == kafka.ErrTimedOut {

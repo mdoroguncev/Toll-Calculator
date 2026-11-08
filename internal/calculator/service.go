@@ -6,7 +6,7 @@ import (
 	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
-type CalculatorServicer interface {
+type Service interface {
 	CalculateDistance(types.OBUData) (float64, error)
 }
 
@@ -19,7 +19,7 @@ type CalcService struct {
 	prevPoint map[int]Point
 }
 
-func NewCalcService() CalculatorServicer {
+func NewService() Service {
 	return &CalcService{
 		prevPoint: make(map[int]Point),
 	}

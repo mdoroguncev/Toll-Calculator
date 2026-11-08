@@ -28,9 +28,9 @@ func main() {
 	)
 	var (
 		err error
-		svc calculator.CalculatorServicer
+		svc calculator.Service
 	)
-	svc = calculator.NewCalcService()
+	svc = calculator.NewService()
 	svc = calculator.NewLogMiddleware(svc)
 
 	htppClient := client.NewHTTPClient(aggregatorEndpoint)
@@ -39,7 +39,7 @@ func main() {
 	// log.Fatal(err)
 	// }
 
-	kafkaConsumer, err := calculator.NewKafkaConsumer(kafkaBrokers, kafkaTopic, kafkaGroup, svc, htppClient)
+	kafkaConsumer, err := calculator.NewConsumer(kafkaBrokers, kafkaTopic, kafkaGroup, svc, htppClient)
 	if err != nil {
 		log.Fatal(err)
 	}

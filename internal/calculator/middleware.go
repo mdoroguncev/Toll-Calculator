@@ -8,10 +8,10 @@ import (
 )
 
 type LogMiddleware struct {
-	next CalculatorServicer
+	next Service
 }
 
-func NewLogMiddleware(next CalculatorServicer) CalculatorServicer {
+func NewLogMiddleware(next Service) Service {
 	return &LogMiddleware{
 		next: next,
 	}

@@ -15,7 +15,7 @@ receiver:
 	@./bin/receiver
 
 calculator:
-	@go build -o bin/calculator ./distance_calculator
+	@go build -o bin/calculator ./cmd/calculator
 	@./bin/calculator
 
 agg:
