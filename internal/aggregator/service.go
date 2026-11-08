@@ -13,28 +13,28 @@ type Service interface {
 	CalculateInvoice(int) (*types.Invoice, error)
 }
 
-type Storer interface {
+type Store interface {
 	Insert(types.Distance) error
 	Get(int) (float64, error)
 }
 
-type InvoiceAggregator struct {
-	store Storer
+type service struct {
+	store Store
 }
 
-func NewService(store Storer) Service {
-	return &InvoiceAggregator{
+func NewService(store Store) Service {
+	return &service{
 		store: store,
 	}
 }
 
-func (i *InvoiceAggregator) AggregateDistance(dist types.Distance) error {
+func (s *service) AggregateDistance(dist types.Distance) error {
 	slog.Info("aggregating distance", "obuID", dist.OBUID, "distance", dist.Value, "unix", dist.Unix)
-	return i.store.Insert(dist)
+	return s.store.Insert(dist)
 }
 
-func (i *InvoiceAggregator) CalculateInvoice(obuID int) (*types.Invoice, error) {
-	dist, err := i.store.Get(obuID)
+func (s *service) CalculateInvoice(obuID int) (*types.Invoice, error) {
+	dist, err := s.store.Get(obuID)
 	if err != nil {
 		return nil, err
 	}

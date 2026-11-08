@@ -37,7 +37,7 @@ func (ms *MemoryStore) Get(id int) (float64, error) {
 	return dist, nil
 }
 
-func NewStore(storeType string) (Storer, error) {
+func NewStore(storeType string) (Store, error) {
 	switch storeType {
 	case "memory":
 		return NewMemoryStore(), nil

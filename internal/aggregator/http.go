@@ -15,13 +15,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type HTTPMetricHandler struct {
+type httpMetricHandler struct {
 	reqCounter prometheus.Counter
 	errCounter prometheus.Counter
 	reqLatency prometheus.Histogram
 }
 
-func newHTTPMetricHandler(reqName string) *HTTPMetricHandler {
+func newHTTPMetricHandler(reqName string) *httpMetricHandler {
 	reqCounter := promauto.NewCounter(prometheus.CounterOpts{
 		Namespace: fmt.Sprintf("http_%s_%s", reqName, "request_counter"),
 		Name:      "aggregator",
@@ -36,14 +36,14 @@ func newHTTPMetricHandler(reqName string) *HTTPMetricHandler {
 		Name:      "aggregator",
 		Buckets:   []float64{0.1, 0.5, 1},
 	})
-	return &HTTPMetricHandler{
+	return &httpMetricHandler{
 		reqCounter: reqCounter,
 		reqLatency: reqLatency,
 		errCounter: errCounter,
 	}
 }
 
-func (h *HTTPMetricHandler) instrument(next httpx.HandlerFunc) httpx.HandlerFunc {
+func (h *httpMetricHandler) instrument(next httpx.HandlerFunc) httpx.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var err error
 		defer func(start time.Time) {

@@ -15,17 +15,17 @@ type Point struct {
 	Long float64
 }
 
-type CalcService struct {
+type service struct {
 	prevPoint map[int]Point
 }
 
 func NewService() Service {
-	return &CalcService{
+	return &service{
 		prevPoint: make(map[int]Point),
 	}
 }
 
-func (s *CalcService) CalculateDistance(data types.OBUData) (float64, error) {
+func (s *service) CalculateDistance(data types.OBUData) (float64, error) {
 	cur := Point{Lat: data.Lat, Long: data.Long}
 
 	prev, ok := s.prevPoint[data.OBUID]
