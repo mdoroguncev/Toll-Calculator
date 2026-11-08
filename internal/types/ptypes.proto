@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/mdoroguncev/toll-calculator/types";
+option go_package = "github.com/mdoroguncev/toll-calculator/internal/types";
 
 service Aggregator {
     rpc Aggregate(AggregateRequest) returns(None);

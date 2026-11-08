@@ -3,7 +3,7 @@ package main
 import (
 	"log/slog"
 
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
 const basePrice = 3.15

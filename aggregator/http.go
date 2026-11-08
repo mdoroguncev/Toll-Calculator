@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )

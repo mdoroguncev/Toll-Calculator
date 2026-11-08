@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
 type LogMiddleware struct {

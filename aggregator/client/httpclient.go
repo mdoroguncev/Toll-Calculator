@@ -9,7 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
 type HTTPClient struct {

@@ -15,7 +15,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/mdoroguncev/toll-calculator/internal/config"
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
 func main() {

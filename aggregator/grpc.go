@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
 type GRPCAggregatorServer struct {

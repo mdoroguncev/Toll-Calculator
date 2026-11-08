@@ -5,7 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
 type DataProducer interface {

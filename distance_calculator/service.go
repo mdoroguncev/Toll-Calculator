@@ -3,7 +3,7 @@ package main
 import (
 	"math"
 
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
 type CalculatorServicer interface {

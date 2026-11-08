@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.12
 // 	protoc        v3.21.12
-// source: types/ptypes.proto
+// source: internal/types/ptypes.proto
 
 package types
 
@@ -29,7 +29,7 @@ type None struct {
 
 func (x *None) Reset() {
 	*x = None{}
-	mi := &file_types_ptypes_proto_msgTypes[0]
+	mi := &file_internal_types_ptypes_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -41,7 +41,7 @@ func (x *None) String() string {
 func (*None) ProtoMessage() {}
 
 func (x *None) ProtoReflect() protoreflect.Message {
-	mi := &file_types_ptypes_proto_msgTypes[0]
+	mi := &file_internal_types_ptypes_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -54,7 +54,7 @@ func (x *None) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use None.ProtoReflect.Descriptor instead.
 func (*None) Descriptor() ([]byte, []int) {
-	return file_types_ptypes_proto_rawDescGZIP(), []int{0}
+	return file_internal_types_ptypes_proto_rawDescGZIP(), []int{0}
 }
 
 type GetInvoiceRequest struct {
@@ -66,7 +66,7 @@ type GetInvoiceRequest struct {
 
 func (x *GetInvoiceRequest) Reset() {
 	*x = GetInvoiceRequest{}
-	mi := &file_types_ptypes_proto_msgTypes[1]
+	mi := &file_internal_types_ptypes_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -78,7 +78,7 @@ func (x *GetInvoiceRequest) String() string {
 func (*GetInvoiceRequest) ProtoMessage() {}
 
 func (x *GetInvoiceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_types_ptypes_proto_msgTypes[1]
+	mi := &file_internal_types_ptypes_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -91,7 +91,7 @@ func (x *GetInvoiceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetInvoiceRequest.ProtoReflect.Descriptor instead.
 func (*GetInvoiceRequest) Descriptor() ([]byte, []int) {
-	return file_types_ptypes_proto_rawDescGZIP(), []int{1}
+	return file_internal_types_ptypes_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetInvoiceRequest) GetObuID() int32 {
@@ -112,7 +112,7 @@ type AggregateRequest struct {
 
 func (x *AggregateRequest) Reset() {
 	*x = AggregateRequest{}
-	mi := &file_types_ptypes_proto_msgTypes[2]
+	mi := &file_internal_types_ptypes_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -124,7 +124,7 @@ func (x *AggregateRequest) String() string {
 func (*AggregateRequest) ProtoMessage() {}
 
 func (x *AggregateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_types_ptypes_proto_msgTypes[2]
+	mi := &file_internal_types_ptypes_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -137,7 +137,7 @@ func (x *AggregateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AggregateRequest.ProtoReflect.Descriptor instead.
 func (*AggregateRequest) Descriptor() ([]byte, []int) {
-	return file_types_ptypes_proto_rawDescGZIP(), []int{2}
+	return file_internal_types_ptypes_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *AggregateRequest) GetObuID() int32 {
@@ -161,11 +161,11 @@ func (x *AggregateRequest) GetUnix() int64 {
 	return 0
 }
 
-var File_types_ptypes_proto protoreflect.FileDescriptor
+var File_internal_types_ptypes_proto protoreflect.FileDescriptor
 
-const file_types_ptypes_proto_rawDesc = "" +
+const file_internal_types_ptypes_proto_rawDesc = "" +
 	"\n" +
-	"\x12types/ptypes.proto\"\x06\n" +
+	"\x1binternal/types/ptypes.proto\"\x06\n" +
 	"\x04None\")\n" +
 	"\x11GetInvoiceRequest\x12\x14\n" +
 	"\x05ObuID\x18\x01 \x01(\x05R\x05ObuID\"R\n" +
@@ -175,27 +175,27 @@ const file_types_ptypes_proto_rawDesc = "" +
 	"\x04Unix\x18\x03 \x01(\x03R\x04Unix23\n" +
 	"\n" +
 	"Aggregator\x12%\n" +
-	"\tAggregate\x12\x11.AggregateRequest\x1a\x05.NoneB.Z,github.com/mdoroguncev/toll-calculator/typesb\x06proto3"
+	"\tAggregate\x12\x11.AggregateRequest\x1a\x05.NoneB7Z5github.com/mdoroguncev/toll-calculator/internal/typesb\x06proto3"
 
 var (
-	file_types_ptypes_proto_rawDescOnce sync.Once
-	file_types_ptypes_proto_rawDescData []byte
+	file_internal_types_ptypes_proto_rawDescOnce sync.Once
+	file_internal_types_ptypes_proto_rawDescData []byte
 )
 
-func file_types_ptypes_proto_rawDescGZIP() []byte {
-	file_types_ptypes_proto_rawDescOnce.Do(func() {
-		file_types_ptypes_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_types_ptypes_proto_rawDesc), len(file_types_ptypes_proto_rawDesc)))
+func file_internal_types_ptypes_proto_rawDescGZIP() []byte {
+	file_internal_types_ptypes_proto_rawDescOnce.Do(func() {
+		file_internal_types_ptypes_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_types_ptypes_proto_rawDesc), len(file_internal_types_ptypes_proto_rawDesc)))
 	})
-	return file_types_ptypes_proto_rawDescData
+	return file_internal_types_ptypes_proto_rawDescData
 }
 
-var file_types_ptypes_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
-var file_types_ptypes_proto_goTypes = []any{
+var file_internal_types_ptypes_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_internal_types_ptypes_proto_goTypes = []any{
 	(*None)(nil),              // 0: None
 	(*GetInvoiceRequest)(nil), // 1: GetInvoiceRequest
 	(*AggregateRequest)(nil),  // 2: AggregateRequest
 }
-var file_types_ptypes_proto_depIdxs = []int32{
+var file_internal_types_ptypes_proto_depIdxs = []int32{
 	2, // 0: Aggregator.Aggregate:input_type -> AggregateRequest
 	0, // 1: Aggregator.Aggregate:output_type -> None
 	1, // [1:2] is the sub-list for method output_type
@@ -205,26 +205,26 @@ var file_types_ptypes_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_types_ptypes_proto_init() }
-func file_types_ptypes_proto_init() {
-	if File_types_ptypes_proto != nil {
+func init() { file_internal_types_ptypes_proto_init() }
+func file_internal_types_ptypes_proto_init() {
+	if File_internal_types_ptypes_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_types_ptypes_proto_rawDesc), len(file_types_ptypes_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_types_ptypes_proto_rawDesc), len(file_internal_types_ptypes_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_types_ptypes_proto_goTypes,
-		DependencyIndexes: file_types_ptypes_proto_depIdxs,
-		MessageInfos:      file_types_ptypes_proto_msgTypes,
+		GoTypes:           file_internal_types_ptypes_proto_goTypes,
+		DependencyIndexes: file_internal_types_ptypes_proto_depIdxs,
+		MessageInfos:      file_internal_types_ptypes_proto_msgTypes,
 	}.Build()
-	File_types_ptypes_proto = out.File
-	file_types_ptypes_proto_goTypes = nil
-	file_types_ptypes_proto_depIdxs = nil
+	File_internal_types_ptypes_proto = out.File
+	file_internal_types_ptypes_proto_goTypes = nil
+	file_internal_types_ptypes_proto_depIdxs = nil
 }

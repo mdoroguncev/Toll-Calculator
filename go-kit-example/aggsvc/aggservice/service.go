@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kit/log"
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
 const basePrice = 3.15

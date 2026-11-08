@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/mdoroguncev/toll-calculator/internal/config"
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 )

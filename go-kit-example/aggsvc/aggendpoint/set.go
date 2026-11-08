@@ -10,7 +10,7 @@ import (
 	"github.com/go-kit/kit/ratelimit"
 	"github.com/go-kit/log"
 	"github.com/mdoroguncev/toll-calculator/go-kit-example/aggsvc/aggservice"
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"github.com/sony/gobreaker"
 	"golang.org/x/time/rate"

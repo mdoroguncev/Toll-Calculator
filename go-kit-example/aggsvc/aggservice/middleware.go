@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/go-kit/log"
-	"github.com/mdoroguncev/toll-calculator/types"
+	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 
 type Middleware func(Service) Service
