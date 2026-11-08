@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log/slog"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/mdoroguncev/toll-calculator/types"
@@ -9,6 +10,7 @@ import (
 
 type DataProducer interface {
 	ProduceData(types.OBUData) error
+	Close()
 }
 
 type KafkaProducer struct {
@@ -53,4 +55,13 @@ func (p *KafkaProducer) ProduceData(data types.OBUData) error {
 
 		Value: b,
 	}, nil)
+}
+
+func (p *KafkaProducer) Close() {
+	msgCount := p.producer.Flush(5000)
+	if msgCount > 0 {
+		slog.Warn("unsended messages count", "msgCount", msgCount)
+	}
+
+	p.producer.Close()
 }

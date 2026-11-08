@@ -28,3 +28,7 @@ func (l *LogMiddleware) ProduceData(data types.OBUData) error {
 	}(time.Now())
 	return l.next.ProduceData(data)
 }
+
+func (l *LogMiddleware) Close() {
+	l.next.Close()
+}
