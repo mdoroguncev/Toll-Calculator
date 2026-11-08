@@ -2,7 +2,6 @@ package aggregator
 
 import (
 	"fmt"
-	"log/slog"
 	"sync"
 
 	"github.com/mdoroguncev/toll-calculator/internal/types"
@@ -38,12 +37,11 @@ func (ms *MemoryStore) Get(id int) (float64, error) {
 	return dist, nil
 }
 
-func NewStore(storeType string) Storer {
+func NewStore(storeType string) (Storer, error) {
 	switch storeType {
 	case "memory":
-		return NewMemoryStore()
+		return NewMemoryStore(), nil
 	default:
-		slog.Error("unknown store type", "storeType", storeType)
-		return nil
+		return nil, fmt.Errorf("unknown store type %q", storeType)
 	}
 }

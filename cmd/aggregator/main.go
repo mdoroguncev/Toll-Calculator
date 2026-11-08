@@ -26,11 +26,16 @@ func main() {
 	defer stop()
 
 	var (
-		store          = aggregator.NewStore(config.Get("AGG_STORE_TYPE", "memory"))
-		svc            = aggregator.NewInvoiceAggregator(store)
 		GRPCListenAddr = config.Get("AGG_GRPC_ENDPOINT", ":3001")
 		HTTPListenAddr = config.Get("AGG_HTTP_ENDPOINT", ":4000")
 	)
+	store, err := aggregator.NewStore(config.Get("AGG_STORE_TYPE", "memory"))
+	if err != nil {
+		slog.Error("failed to make store", "err", err)
+		os.Exit(1)
+	}
+
+	svc := aggregator.NewInvoiceAggregator(store)
 	svc = aggregator.NewMetricsMiddleware(svc)
 	svc = aggregator.NewLogMiddleware(svc)
 
