@@ -1,4 +1,4 @@
-package main
+package httpx
 
 import (
 	"encoding/json"
@@ -8,10 +8,10 @@ import (
 	"testing"
 )
 
-func TestMakeHTTPHandlerFunc(t *testing.T) {
+func TestHandle(t *testing.T) {
 	tests := []struct {
 		name     string
-		fn       HTTPFunc
+		fn       HandlerFunc
 		wantCode int
 		wantErr  string
 	}{
@@ -32,7 +32,7 @@ func TestMakeHTTPHandlerFunc(t *testing.T) {
 		}, {
 			name: "no errors",
 			fn: func(w http.ResponseWriter, r *http.Request) error {
-				return writeJSON(w, http.StatusOK, map[string]string{"msg": "ok"})
+				return WriteJSON(w, http.StatusOK, map[string]string{"msg": "ok"})
 			},
 			wantCode: http.StatusOK,
 			wantErr:  "",
@@ -44,7 +44,7 @@ func TestMakeHTTPHandlerFunc(t *testing.T) {
 			rec := httptest.NewRecorder()
 			req := httptest.NewRequest(http.MethodGet, "/invoice", nil)
 
-			makeHTTPHandlerFunc(tt.fn)(rec, req)
+			Handle(tt.fn)(rec, req)
 
 			if tt.wantCode != rec.Code {
 				t.Errorf("want %v code got %v code", tt.wantCode, rec.Code)

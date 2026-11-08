@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"log"
 	"log/slog"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"github.com/mdoroguncev/toll-calculator/internal/config"
+	"github.com/mdoroguncev/toll-calculator/internal/httpx"
 	"github.com/mdoroguncev/toll-calculator/internal/types"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
@@ -95,8 +95,8 @@ func makeHTTPServer(listenAddr string, svc Aggregator) *http.Server {
 	var (
 		aggMetricHandler = newHTTPMetricHandler("aggregate")
 		invMetricHandler = newHTTPMetricHandler("invoice")
-		aggregateHandler = makeHTTPHandlerFunc(aggMetricHandler.instrument(handleAggregate(svc)))
-		invoiceHandler   = makeHTTPHandlerFunc(invMetricHandler.instrument(handleGetInvoice(svc)))
+		aggregateHandler = httpx.Handle(aggMetricHandler.instrument(handleAggregate(svc)))
+		invoiceHandler   = httpx.Handle(invMetricHandler.instrument(handleGetInvoice(svc)))
 		mux              = http.NewServeMux()
 	)
 
@@ -117,10 +117,4 @@ func makeStore(storeType string) Storer {
 		return nil
 	}
 
-}
-
-func writeJSON(w http.ResponseWriter, status int, v any) error {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(status)
-	return json.NewEncoder(w).Encode(v)
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -17,18 +16,8 @@ import (
 
 	"github.com/mdoroguncev/toll-calculator/aggregator/client"
 	"github.com/mdoroguncev/toll-calculator/internal/config"
+	"github.com/mdoroguncev/toll-calculator/internal/httpx"
 )
-
-type APIError struct {
-	Code int
-	Err  error
-}
-
-func (e APIError) Error() string {
-	return e.Err.Error()
-}
-
-type apiFunc func(w http.ResponseWriter, r *http.Request) error
 
 func main() {
 	if err := config.LoadDotEnv(); err != nil {
@@ -72,9 +61,9 @@ func newRouter(c client.Client) http.Handler {
 	invHandler := NewInvoiceHandler(c)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /invoice/{obuID}", makeAPIFunc(invHandler.handleGetInvoice))
+	mux.HandleFunc("GET /invoice/{obuID}", httpx.Handle(invHandler.handleGetInvoice))
 
-	return mux
+	return httpx.Logging(mux)
 }
 
 type InvoiceHandler struct {
@@ -90,34 +79,12 @@ func NewInvoiceHandler(client client.Client) *InvoiceHandler {
 func (h *InvoiceHandler) handleGetInvoice(w http.ResponseWriter, r *http.Request) error {
 	intID, err := strconv.Atoi(r.PathValue("obuID"))
 	if err != nil {
-		return APIError{Code: http.StatusBadRequest, Err: fmt.Errorf("invalid obu id %q", r.PathValue("obuID"))}
+		return httpx.APIError{Code: http.StatusBadRequest, Err: fmt.Errorf("invalid obu id %q", r.PathValue("obuID"))}
 	}
 
 	inv, err := h.client.GetInvoice(r.Context(), intID)
 	if err != nil {
 		return err
 	}
-	return writeJSON(w, http.StatusOK, inv)
-}
-
-func writeJSON(w http.ResponseWriter, code int, v any) error {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(code)
-	return json.NewEncoder(w).Encode(v)
-}
-
-func makeAPIFunc(fn apiFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var err error
-		defer func(start time.Time) {
-			slog.Info("REQ:", "took", time.Since(start), "uri", r.RequestURI, "err", err)
-		}(time.Now())
-		if err = fn(w, r); err != nil {
-			if apiErr, ok := err.(APIError); ok {
-				writeJSON(w, apiErr.Code, map[string]string{"error": apiErr.Error()})
-			} else {
-				writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "internal server error"})
-			}
-		}
-	}
+	return httpx.WriteJSON(w, http.StatusOK, inv)
 }
