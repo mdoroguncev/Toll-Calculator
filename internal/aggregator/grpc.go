@@ -11,10 +11,10 @@ import (
 
 type grpcAggregatorServer struct {
 	types.UnimplementedAggregatorServer
-	svc Aggregator
+	svc Service
 }
 
-func newAggregatorGRPCServer(svc Aggregator) *grpcAggregatorServer {
+func newAggregatorGRPCServer(svc Service) *grpcAggregatorServer {
 	return &grpcAggregatorServer{
 		svc: svc,
 	}
@@ -32,7 +32,7 @@ func (s *grpcAggregatorServer) Aggregate(ctx context.Context, req *types.Aggrega
 	return &types.None{}, nil
 }
 
-func NewGRPCServer(listenAddr string, svc Aggregator) (*grpc.Server, net.Listener, error) {
+func NewGRPCServer(listenAddr string, svc Service) (*grpc.Server, net.Listener, error) {
 	slog.Info("grpc server created", "addr", listenAddr)
 	// make a tcp listener
 	ln, err := net.Listen("tcp", listenAddr)

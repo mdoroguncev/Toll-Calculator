@@ -60,7 +60,7 @@ func (h *HTTPMetricHandler) instrument(next httpx.HandlerFunc) httpx.HandlerFunc
 	}
 }
 
-func handleGetInvoice(svc Aggregator) httpx.HandlerFunc {
+func handleGetInvoice(svc Service) httpx.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if r.Method != "GET" {
 			return httpx.APIError{
@@ -96,7 +96,7 @@ func handleGetInvoice(svc Aggregator) httpx.HandlerFunc {
 	}
 }
 
-func handleAggregate(svc Aggregator) httpx.HandlerFunc {
+func handleAggregate(svc Service) httpx.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if r.Method != "POST" {
 			return httpx.APIError{
@@ -123,7 +123,7 @@ func handleAggregate(svc Aggregator) httpx.HandlerFunc {
 	}
 }
 
-func NewHTTPServer(listenAddr string, svc Aggregator) *http.Server {
+func NewHTTPServer(listenAddr string, svc Service) *http.Server {
 	var (
 		aggMetricHandler = newHTTPMetricHandler("aggregate")
 		invMetricHandler = newHTTPMetricHandler("invoice")

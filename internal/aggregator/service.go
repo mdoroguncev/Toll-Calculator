@@ -8,7 +8,7 @@ import (
 
 const basePrice = 3.15
 
-type Aggregator interface {
+type Service interface {
 	AggregateDistance(types.Distance) error
 	CalculateInvoice(int) (*types.Invoice, error)
 }
@@ -22,7 +22,7 @@ type InvoiceAggregator struct {
 	store Storer
 }
 
-func NewInvoiceAggregator(store Storer) Aggregator {
+func NewService(store Storer) Service {
 	return &InvoiceAggregator{
 		store: store,
 	}

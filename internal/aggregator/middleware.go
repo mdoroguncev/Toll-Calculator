@@ -16,10 +16,10 @@ type MetricsMiddleware struct {
 	reqCounterCalc prometheus.Counter
 	reqLatencyAgg  prometheus.Histogram
 	reqLatencyCalc prometheus.Histogram
-	next           Aggregator
+	next           Service
 }
 
-func NewMetricsMiddleware(next Aggregator) *MetricsMiddleware {
+func NewMetricsMiddleware(next Service) *MetricsMiddleware {
 	errCounterAgg := promauto.NewCounter(prometheus.CounterOpts{
 		Namespace: "aggregator_error_counter",
 		Name:      "aggregate",
@@ -86,10 +86,10 @@ func (m *MetricsMiddleware) CalculateInvoice(obuID int) (inv *types.Invoice, err
 }
 
 type LogMiddleware struct {
-	next Aggregator
+	next Service
 }
 
-func NewLogMiddleware(next Aggregator) Aggregator {
+func NewLogMiddleware(next Service) Service {
 	return &LogMiddleware{
 		next: next,
 	}
