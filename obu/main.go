@@ -62,7 +62,9 @@ func main() {
 		}
 		select {
 		case <-ctx.Done():
-			slog.Warn(conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")).Error())
+			if err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")); err != nil {
+				slog.Warn("failed to send close message", "err", err)
+			}
 			conn.Close()
 			slog.Info("obu stopped")
 			return
