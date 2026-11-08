@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mdoroguncev/toll-calculator/aggregator/client"
+	"github.com/mdoroguncev/toll-calculator/internal/aggregator/client"
 	"github.com/mdoroguncev/toll-calculator/internal/types"
 )
 

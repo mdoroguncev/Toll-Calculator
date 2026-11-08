@@ -19,7 +19,7 @@ calculator:
 	@./bin/calculator
 
 agg:
-	@go build -o bin/agg ./aggregator
+	@go build -o bin/agg ./cmd/aggregator
 	@./bin/agg
 
 proto:

@@ -1,7 +1,8 @@
-package main
+package aggregator
 
 import (
 	"fmt"
+	"log/slog"
 	"sync"
 
 	"github.com/mdoroguncev/toll-calculator/internal/types"
@@ -35,4 +36,14 @@ func (ms *MemoryStore) Get(id int) (float64, error) {
 		return 0.0, fmt.Errorf("could not find distance for obu id %d", id)
 	}
 	return dist, nil
+}
+
+func NewStore(storeType string) Storer {
+	switch storeType {
+	case "memory":
+		return NewMemoryStore()
+	default:
+		slog.Error("unknown store type", "storeType", storeType)
+		return nil
+	}
 }

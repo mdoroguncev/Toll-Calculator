@@ -8,13 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/mdoroguncev/toll-calculator/aggregator/client"
+	"github.com/mdoroguncev/toll-calculator/internal/aggregator/client"
 	"github.com/mdoroguncev/toll-calculator/internal/config"
 )
-
-// type DistanceCalculator struct {
-// 	consumer DataConsumer
-// }
 
 func main() {
 	if err := config.LoadDotEnv(); err != nil {

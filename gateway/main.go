@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/mdoroguncev/toll-calculator/aggregator/client"
+	"github.com/mdoroguncev/toll-calculator/internal/aggregator/client"
 	"github.com/mdoroguncev/toll-calculator/internal/config"
 	"github.com/mdoroguncev/toll-calculator/internal/httpx"
 )

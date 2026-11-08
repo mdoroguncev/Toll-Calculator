@@ -1,4 +1,4 @@
-package main
+package aggregator
 
 import (
 	"encoding/json"
@@ -12,6 +12,7 @@ import (
 	"github.com/mdoroguncev/toll-calculator/internal/types"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type HTTPMetricHandler struct {
@@ -120,4 +121,21 @@ func handleAggregate(svc Aggregator) httpx.HandlerFunc {
 		}
 		return httpx.WriteJSON(w, http.StatusOK, map[string]string{"msg": "ok"})
 	}
+}
+
+func NewHTTPServer(listenAddr string, svc Aggregator) *http.Server {
+	var (
+		aggMetricHandler = newHTTPMetricHandler("aggregate")
+		invMetricHandler = newHTTPMetricHandler("invoice")
+		aggregateHandler = httpx.Handle(aggMetricHandler.instrument(handleAggregate(svc)))
+		invoiceHandler   = httpx.Handle(invMetricHandler.instrument(handleGetInvoice(svc)))
+		mux              = http.NewServeMux()
+	)
+
+	mux.HandleFunc("/invoice", invoiceHandler)
+	mux.HandleFunc("/aggregate", aggregateHandler)
+	mux.Handle("/metrics", promhttp.Handler())
+
+	slog.Info("http server created", "addr", listenAddr)
+	return &http.Server{Addr: listenAddr, Handler: mux}
 }
