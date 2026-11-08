@@ -4,19 +4,17 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
 	"github.com/mdoroguncev/toll-calculator/internal/aggregator/client"
 	"github.com/mdoroguncev/toll-calculator/internal/config"
-	"github.com/mdoroguncev/toll-calculator/internal/httpx"
+	"github.com/mdoroguncev/toll-calculator/internal/gateway"
 )
 
 func main() {
@@ -36,7 +34,7 @@ func main() {
 	flag.Parse()
 
 	aggClient := client.NewHTTPClient(*aggregatorServiceAddr) //endpoint for the aggregator service
-	handler := newRouter(aggClient)
+	handler := gateway.NewRouter(aggClient)
 	srv := &http.Server{Addr: *listenAddr, Handler: handler}
 	slog.Info("gateway http is running on port", "addr", *listenAddr)
 
@@ -55,36 +53,4 @@ func main() {
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		slog.Error("failed to shutdown the server", "err", err)
 	}
-}
-
-func newRouter(c client.Client) http.Handler {
-	invHandler := NewInvoiceHandler(c)
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /invoice/{obuID}", httpx.Handle(invHandler.handleGetInvoice))
-
-	return httpx.Logging(mux)
-}
-
-type InvoiceHandler struct {
-	client client.Client
-}
-
-func NewInvoiceHandler(client client.Client) *InvoiceHandler {
-	return &InvoiceHandler{
-		client: client,
-	}
-}
-
-func (h *InvoiceHandler) handleGetInvoice(w http.ResponseWriter, r *http.Request) error {
-	intID, err := strconv.Atoi(r.PathValue("obuID"))
-	if err != nil {
-		return httpx.APIError{Code: http.StatusBadRequest, Err: fmt.Errorf("invalid obu id %q", r.PathValue("obuID"))}
-	}
-
-	inv, err := h.client.GetInvoice(r.Context(), intID)
-	if err != nil {
-		return err
-	}
-	return httpx.WriteJSON(w, http.StatusOK, inv)
 }

@@ -26,5 +26,5 @@ proto:
 	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative internal/types/ptypes.proto
 
 gate:
-	@go build -o bin/gate gateway/main.go
+	@go build -o bin/gate ./cmd/gateway
 	@./bin/gate

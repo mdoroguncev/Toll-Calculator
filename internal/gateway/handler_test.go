@@ -1,4 +1,4 @@
-package main
+package gateway
 
 import (
 	"context"
@@ -91,7 +91,7 @@ func TestHandleGetInvoice(t *testing.T) {
 			rec := httptest.NewRecorder()
 			req := httptest.NewRequest(tt.method, tt.path, nil)
 
-			newRouter(tt.fake).ServeHTTP(rec, req)
+			NewRouter(tt.fake).ServeHTTP(rec, req)
 
 			if rec.Code != tt.wantCode {
 				t.Fatalf("want code %v, got %v", tt.wantCode, rec.Code)
