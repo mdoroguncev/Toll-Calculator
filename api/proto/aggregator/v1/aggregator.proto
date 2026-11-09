@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package aggregator.v1;
+
+option go_package = "github.com/mdoroguncev/toll-calculator/gen/aggregator/v1;aggregatorv1";
+
+service AggregatorService {
+    rpc Aggregate(AggregateRequest) returns (AggregateResponse);
+    rpc GetInvoice(GetInvoiceRequest) returns (GetInvoiceResponse);
+}
+
+message AggregateRequest {
+    int32 obu_id = 1;
+    double value = 2;
+    int64 unix = 3;
+}
+
+message AggregateResponse {}
+
+message GetInvoiceRequest {
+    int32 obu_id = 1;
+}
+
+message GetInvoiceResponse {
+    int32 obu_id = 1;
+    double total_distance = 2;
+    double total_amount = 3;
+}
