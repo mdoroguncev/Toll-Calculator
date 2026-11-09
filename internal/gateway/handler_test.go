@@ -29,7 +29,7 @@ func (f *fakeClient) GetInvoice(_ context.Context, id int) (*types.Invoice, erro
 	return f.inv, f.err
 }
 
-func (f *fakeClient) Aggregate(_ context.Context, req *types.AggregateRequest) error {
+func (f *fakeClient) Aggregate(_ context.Context, dist types.Distance) error {
 	return nil
 }
 

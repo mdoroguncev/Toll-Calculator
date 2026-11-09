@@ -78,14 +78,14 @@ func TestAggregate(t *testing.T) {
 	tests := []struct {
 		name    string
 		handler http.HandlerFunc
-		req     *types.AggregateRequest
+		dist    types.Distance
 		wantErr bool
 	}{
 		{
 			name: "success",
-			req:  &types.AggregateRequest{ObuID: 12345, Value: 1000.10, Unix: 10},
+			dist: types.Distance{OBUID: 12345, Value: 1000.10, Unix: 10},
 			handler: func(w http.ResponseWriter, r *http.Request) {
-				want := types.AggregateRequest{ObuID: 12345, Value: 1000.10, Unix: 10}
+				want := types.Distance{OBUID: 12345, Value: 1000.10, Unix: 10}
 
 				if r.Method != http.MethodPost {
 					t.Errorf("want method POST, got %s", r.Method)
@@ -94,20 +94,20 @@ func TestAggregate(t *testing.T) {
 					t.Errorf("want path /aggregate, got %s", r.URL.Path)
 				}
 
-				var got types.AggregateRequest
+				var got types.Distance
 				if err := json.NewDecoder(r.Body).Decode(&got); err != nil {
 					t.Errorf("failed to decode request body %v", err)
 				}
 
-				if got.ObuID != want.ObuID || want.Value != got.Value || want.Unix != got.Unix {
-					t.Errorf("want id %v, got %v. want value %v, got %v. want unix %v, got %v.", want.ObuID, got.ObuID, want.Value, got.Value, want.Unix, got.Unix)
+				if got.OBUID != want.OBUID || want.Value != got.Value || want.Unix != got.Unix {
+					t.Errorf("want id %v, got %v. want value %v, got %v. want unix %v, got %v.", want.OBUID, got.OBUID, want.Value, got.Value, want.Unix, got.Unix)
 				}
 				w.WriteHeader(http.StatusOK)
 			},
 			wantErr: false,
 		}, {
 			name: "server returns 500",
-			req:  &types.AggregateRequest{ObuID: 1, Value: 1, Unix: 1},
+			dist: types.Distance{OBUID: 1, Value: 1, Unix: 1},
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			},
@@ -121,7 +121,7 @@ func TestAggregate(t *testing.T) {
 			defer srv.Close()
 
 			c := NewHTTPClient(srv.URL)
-			err := c.Aggregate(context.Background(), tt.req)
+			err := c.Aggregate(context.Background(), tt.dist)
 
 			if tt.wantErr && err == nil {
 				t.Fatalf("want error, got nil")

@@ -68,10 +68,10 @@ func (c *Consumer) readMessageLoop(ctx context.Context) {
 			slog.Error("calculation error", "err", err)
 			continue
 		}
-		req := &types.AggregateRequest{
+		req := types.Distance{
 			Value: distance,
-			Unix:  int64(time.Now().UnixNano()),
-			ObuID: int32(data.OBUID),
+			Unix:  int(time.Now().Unix()),
+			OBUID: data.OBUID,
 		}
 		if err := c.aggClient.Aggregate(ctx, req); err != nil {
 			slog.Error("aggregate error", "err", err)

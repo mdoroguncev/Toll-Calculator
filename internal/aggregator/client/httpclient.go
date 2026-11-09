@@ -46,8 +46,8 @@ func (c *HTTPClient) GetInvoice(ctx context.Context, id int) (*types.Invoice, er
 	return &inv, nil
 }
 
-func (c *HTTPClient) Aggregate(ctx context.Context, aggReq *types.AggregateRequest) error {
-	b, err := json.Marshal(aggReq)
+func (c *HTTPClient) Aggregate(ctx context.Context, dist types.Distance) error {
+	b, err := json.Marshal(dist)
 	if err != nil {
 		return err
 	}
