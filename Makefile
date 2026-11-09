@@ -7,7 +7,7 @@ down:
 	@docker compose down
 
 obu:
-	@go build -o bin/obu obu/main.go
+	@go build -o bin/obu ./cmd/obu/main.go
 	@./bin/obu
 
 receiver:
