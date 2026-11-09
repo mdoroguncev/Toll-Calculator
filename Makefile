@@ -11,7 +11,7 @@ obu:
 	@./bin/obu
 
 receiver:
-	@go build -o bin/receiver ./data_receiver
+	@go build -o bin/receiver ./cmd/receiver
 	@./bin/receiver
 
 calculator:
