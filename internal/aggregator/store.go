@@ -32,7 +32,7 @@ func (ms *MemoryStore) Get(id int) (float64, error) {
 
 	dist, ok := ms.data[id]
 	if !ok {
-		return 0.0, fmt.Errorf("could not find distance for obu id %d", id)
+		return 0.0, fmt.Errorf("obu %d: %w", id, ErrNotFound)
 	}
 	return dist, nil
 }

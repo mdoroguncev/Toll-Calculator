@@ -2,6 +2,7 @@ package aggregator
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -86,7 +87,12 @@ func handleGetInvoice(svc Service) httpx.HandlerFunc {
 		}
 
 		invoice, err := svc.CalculateInvoice(obuID)
-		if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return httpx.APIError{
+				Code: http.StatusNotFound,
+				Err:  err,
+			}
+		} else if err != nil {
 			return httpx.APIError{
 				Code: http.StatusInternalServerError,
 				Err:  err,
