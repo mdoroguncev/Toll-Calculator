@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -35,6 +36,9 @@ func (h *invoiceHandler) handleGetInvoice(w http.ResponseWriter, r *http.Request
 	}
 
 	inv, err := h.client.GetInvoice(r.Context(), intID)
+	if errors.Is(err, client.ErrNotFound) {
+		return httpx.APIError{Code: http.StatusNotFound, Err: err}
+	}
 	if err != nil {
 		return err
 	}

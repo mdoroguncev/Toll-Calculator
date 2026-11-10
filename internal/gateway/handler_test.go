@@ -83,6 +83,15 @@ func TestHandleGetInvoice(t *testing.T) {
 			wantCode:   405,
 			wantInv:    nil,
 			wantCalled: false,
+		}, {
+			name:       "not found",
+			method:     http.MethodGet,
+			path:       "/invoice/7",
+			fake:       &fakeClient{err: client.ErrNotFound},
+			wantCode:   404,
+			wantErr:    "not found",
+			wantInv:    nil,
+			wantCalled: true,
 		},
 	}
 

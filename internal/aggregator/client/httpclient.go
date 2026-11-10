@@ -36,9 +36,13 @@ func (c *HTTPClient) GetInvoice(ctx context.Context, id int) (*types.Invoice, er
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, ErrNotFound
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("the service responded with not 200 status code %d", resp.StatusCode)
 	}
+
 	var inv types.Invoice
 	if err := json.NewDecoder(resp.Body).Decode(&inv); err != nil {
 		return nil, err
