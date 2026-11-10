@@ -28,13 +28,15 @@ func main() {
 	defer stop()
 
 	// Flags override environment variables, environment variables override the defaults.
-	aggregatorServiceAddr := flag.String("aggServiceAddr", config.Get("AGG_HTTP_URL", "http://localhost:4000"), "the listen addres of the aggregator service")
 	listenAddr := flag.String("listenAddr", config.Get("GATEWAY_ADDR", ":6000"), "the listen addres of the http server")
 
 	flag.Parse()
 
-	aggClient := client.NewHTTPClient(*aggregatorServiceAddr) //endpoint for the aggregator service
-	handler := gateway.NewRouter(aggClient)
+	aggGRPCClient, err := client.NewGRPCClient(config.Get("AGG_GRPC_URL", "127.0.0.1:3001"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	handler := gateway.NewRouter(aggGRPCClient)
 	srv := &http.Server{Addr: *listenAddr, Handler: handler}
 	slog.Info("gateway http is running on port", "addr", *listenAddr)
 
@@ -52,5 +54,8 @@ func main() {
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		slog.Error("failed to shutdown the server", "err", err)
+	}
+	if err = aggGRPCClient.Close(); err != nil {
+		slog.Error("failed to close grpc client", "err", err)
 	}
 }
