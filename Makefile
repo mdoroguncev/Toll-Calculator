@@ -1,4 +1,4 @@
-.PHONY: up down obu receiver calculator agg invoicer proto buf gate
+.PHONY: up down obu receiver calculator agg invoicer buf gate
 
 up:
 	@docker compose up -d
@@ -21,9 +21,6 @@ calculator:
 agg:
 	@go build -o bin/agg ./cmd/aggregator
 	@./bin/agg
-
-proto:
-	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative internal/types/ptypes.proto
 
 buf:
 	buf lint
