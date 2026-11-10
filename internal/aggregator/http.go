@@ -86,7 +86,7 @@ func handleGetInvoice(svc Service) httpx.HandlerFunc {
 			}
 		}
 
-		invoice, err := svc.CalculateInvoice(obuID)
+		invoice, err := svc.CalculateInvoice(r.Context(), obuID)
 		if errors.Is(err, ErrNotFound) {
 			return httpx.APIError{
 				Code: http.StatusNotFound,
@@ -119,7 +119,7 @@ func handleAggregate(svc Service) httpx.HandlerFunc {
 			}
 		}
 
-		if err := svc.AggregateDistance(distance); err != nil {
+		if err := svc.AggregateDistance(r.Context(), distance); err != nil {
 			return httpx.APIError{
 				Code: http.StatusInternalServerError,
 				Err:  err,

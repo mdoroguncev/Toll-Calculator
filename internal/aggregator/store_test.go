@@ -1,6 +1,7 @@
 package aggregator
 
 import (
+	"context"
 	"sync"
 	"testing"
 
@@ -17,7 +18,7 @@ func TestMemoryStoreConcurrent(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := s.Insert(types.Distance{OBUID: 1, Value: 1}); err != nil {
+			if err := s.Insert(context.Background(), types.Distance{OBUID: 1, Value: 1}); err != nil {
 				t.Errorf("error: %v", err)
 			}
 		}()
@@ -26,11 +27,11 @@ func TestMemoryStoreConcurrent(t *testing.T) {
 		go func() {
 			defer wg.Done()
 
-			_, _ = s.Get(1)
+			_, _ = s.Get(context.Background(), 1)
 		}()
 	}
 	wg.Wait()
-	got, err := s.Get(1)
+	got, err := s.Get(context.Background(), 1)
 	if err != nil {
 		t.Fatalf("error: %v", err)
 	}

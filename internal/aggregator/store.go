@@ -1,6 +1,7 @@
 package aggregator
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -18,7 +19,7 @@ func NewMemoryStore() *MemoryStore {
 	}
 }
 
-func (ms *MemoryStore) Insert(dist types.Distance) error {
+func (ms *MemoryStore) Insert(ctx context.Context, dist types.Distance) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 
@@ -26,7 +27,7 @@ func (ms *MemoryStore) Insert(dist types.Distance) error {
 	return nil
 }
 
-func (ms *MemoryStore) Get(id int) (float64, error) {
+func (ms *MemoryStore) Get(ctx context.Context, id int) (float64, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 

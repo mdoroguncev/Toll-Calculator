@@ -31,14 +31,14 @@ func (s *grpcAggregatorServer) Aggregate(ctx context.Context, req *aggregatorv1.
 		Value: req.GetValue(),
 		Unix:  int(req.GetUnix()),
 	}
-	if err := s.svc.AggregateDistance(distance); err != nil {
+	if err := s.svc.AggregateDistance(ctx, distance); err != nil {
 		return nil, err
 	}
 	return &aggregatorv1.AggregateResponse{}, nil
 }
 
 func (s *grpcAggregatorServer) GetInvoice(ctx context.Context, req *aggregatorv1.GetInvoiceRequest) (*aggregatorv1.GetInvoiceResponse, error) {
-	invoice, err := s.svc.CalculateInvoice(int(req.GetObuId()))
+	invoice, err := s.svc.CalculateInvoice(ctx, int(req.GetObuId()))
 	if errors.Is(err, ErrNotFound) {
 		return nil, status.Error(codes.NotFound, err.Error())
 	} else if err != nil {

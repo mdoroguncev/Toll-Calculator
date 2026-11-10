@@ -1,6 +1,7 @@
 package aggregator
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/mdoroguncev/toll-calculator/internal/types"
@@ -9,13 +10,13 @@ import (
 const basePrice = 3.15
 
 type Service interface {
-	AggregateDistance(types.Distance) error
-	CalculateInvoice(int) (*types.Invoice, error)
+	AggregateDistance(context.Context, types.Distance) error
+	CalculateInvoice(context.Context, int) (*types.Invoice, error)
 }
 
 type Store interface {
-	Insert(types.Distance) error
-	Get(int) (float64, error)
+	Insert(context.Context, types.Distance) error
+	Get(context.Context, int) (float64, error)
 }
 
 type service struct {
@@ -28,13 +29,13 @@ func NewService(store Store) Service {
 	}
 }
 
-func (s *service) AggregateDistance(dist types.Distance) error {
+func (s *service) AggregateDistance(ctx context.Context, dist types.Distance) error {
 	slog.Info("aggregating distance", "obuID", dist.OBUID, "distance", dist.Value, "unix", dist.Unix)
-	return s.store.Insert(dist)
+	return s.store.Insert(ctx, dist)
 }
 
-func (s *service) CalculateInvoice(obuID int) (*types.Invoice, error) {
-	dist, err := s.store.Get(obuID)
+func (s *service) CalculateInvoice(ctx context.Context, obuID int) (*types.Invoice, error) {
+	dist, err := s.store.Get(ctx, obuID)
 	if err != nil {
 		return nil, err
 	}

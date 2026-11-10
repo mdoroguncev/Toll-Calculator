@@ -1,6 +1,7 @@
 package aggregator
 
 import (
+	"context"
 	"log/slog"
 	"time"
 
@@ -59,7 +60,7 @@ func NewMetricsMiddleware(next Service) *MetricsMiddleware {
 	}
 }
 
-func (m *MetricsMiddleware) AggregateDistance(distance types.Distance) (err error) {
+func (m *MetricsMiddleware) AggregateDistance(ctx context.Context, distance types.Distance) (err error) {
 	defer func(start time.Time) {
 		m.reqLatencyAgg.Observe(float64(time.Since(start).Seconds()))
 		m.reqCounterAgg.Inc()
@@ -68,11 +69,11 @@ func (m *MetricsMiddleware) AggregateDistance(distance types.Distance) (err erro
 		}
 	}(time.Now())
 
-	err = m.next.AggregateDistance(distance)
+	err = m.next.AggregateDistance(ctx, distance)
 	return
 }
 
-func (m *MetricsMiddleware) CalculateInvoice(obuID int) (inv *types.Invoice, err error) {
+func (m *MetricsMiddleware) CalculateInvoice(ctx context.Context, obuID int) (inv *types.Invoice, err error) {
 	defer func(start time.Time) {
 		m.reqLatencyCalc.Observe(float64(time.Since(start).Seconds()))
 		m.reqCounterCalc.Inc()
@@ -81,7 +82,7 @@ func (m *MetricsMiddleware) CalculateInvoice(obuID int) (inv *types.Invoice, err
 		}
 	}(time.Now())
 
-	inv, err = m.next.CalculateInvoice(obuID)
+	inv, err = m.next.CalculateInvoice(ctx, obuID)
 	return
 }
 
@@ -95,16 +96,16 @@ func NewLogMiddleware(next Service) Service {
 	}
 }
 
-func (m *LogMiddleware) AggregateDistance(distance types.Distance) (err error) {
+func (m *LogMiddleware) AggregateDistance(ctx context.Context, distance types.Distance) (err error) {
 	defer func(start time.Time) {
 		slog.Info("AggregateDistance", "took", time.Since(start), "err", err)
 	}(time.Now())
 
-	err = m.next.AggregateDistance(distance)
+	err = m.next.AggregateDistance(ctx, distance)
 	return
 }
 
-func (m *LogMiddleware) CalculateInvoice(obuID int) (inv *types.Invoice, err error) {
+func (m *LogMiddleware) CalculateInvoice(ctx context.Context, obuID int) (inv *types.Invoice, err error) {
 	defer func(start time.Time) {
 		var (
 			distance float64
@@ -124,6 +125,6 @@ func (m *LogMiddleware) CalculateInvoice(obuID int) (inv *types.Invoice, err err
 		)
 	}(time.Now())
 
-	inv, err = m.next.CalculateInvoice(obuID)
+	inv, err = m.next.CalculateInvoice(ctx, obuID)
 	return
 }
