@@ -29,7 +29,12 @@ func main() {
 		GRPCListenAddr = config.Get("AGG_GRPC_ENDPOINT", ":3001")
 		HTTPListenAddr = config.Get("AGG_HTTP_ENDPOINT", ":4000")
 	)
-	store, err := aggregator.NewStore(config.Get("AGG_STORE_TYPE", "memory"))
+	storeType := config.Get("AGG_STORE_TYPE", "memory")
+	dsn := config.Get("AGG_DB_DSN", "")
+	connectCtx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	store, err := aggregator.NewStore(connectCtx, storeType, dsn)
 	if err != nil {
 		slog.Error("failed to make store", "err", err)
 		os.Exit(1)
@@ -75,4 +80,5 @@ func main() {
 	}
 	grpcSrv.GracefulStop()
 
+	store.Close()
 }

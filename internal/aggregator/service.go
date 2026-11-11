@@ -17,6 +17,7 @@ type Service interface {
 type Store interface {
 	Insert(context.Context, types.Distance) error
 	Get(context.Context, int) (float64, error)
+	Close()
 }
 
 type service struct {

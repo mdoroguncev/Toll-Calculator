@@ -38,11 +38,19 @@ func (ms *MemoryStore) Get(ctx context.Context, id int) (float64, error) {
 	return dist, nil
 }
 
-func NewStore(storeType string) (Store, error) {
+func NewStore(ctx context.Context, storeType, dsn string) (Store, error) {
 	switch storeType {
 	case "memory":
 		return NewMemoryStore(), nil
+	case "postgres":
+		s, err := NewPostgresStore(ctx, dsn)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
 	default:
 		return nil, fmt.Errorf("unknown store type %q", storeType)
 	}
 }
+
+func (ms *MemoryStore) Close() {}
