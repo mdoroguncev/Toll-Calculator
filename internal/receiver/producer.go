@@ -3,6 +3,7 @@ package receiver
 import (
 	"encoding/json"
 	"log/slog"
+	"strconv"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/mdoroguncev/toll-calculator/internal/types"
@@ -52,7 +53,7 @@ func (p *KafkaProducer) ProduceData(data types.OBUData) error {
 			Topic:     &p.topic,
 			Partition: kafka.PartitionAny,
 		},
-
+		Key:   []byte(strconv.Itoa(data.OBUID)),
 		Value: b,
 	}, nil)
 }
