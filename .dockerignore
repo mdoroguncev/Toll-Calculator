@@ -1,0 +1,6 @@
+.git
+.idea
+bin
+data
+.env
+.config/grafana/data
