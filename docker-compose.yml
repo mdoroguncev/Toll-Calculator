@@ -84,6 +84,53 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+  
+  aggregator:
+    build:
+      context: .
+      args:
+        SERVICE: aggregator
+    environment:
+      - AGG_STORE_TYPE=postgres
+      - AGG_DB_DSN=postgres://toll:toll@postgres:5432/toll?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  receiver:
+    build:
+      context: .
+      args:
+        SERVICE: receiver
+    environment:
+      - KAFKA_BROKERS=kafka:29092
+
+  calculator:
+    build:
+      context: .
+      args:
+        SERVICE: calculator
+    environment:
+      - KAFKA_BROKERS=kafka:29092
+      - AGG_GRPC_URL=aggregator:3001
+
+  gateway:
+    build:
+      context: .
+      args:
+        SERVICE: gateway
+    environment:
+      - AGG_GRPC_URL=aggregator:3001
+    ports:
+      - "6000:6000"
+
+  obu:
+    build:
+      context: .
+      args:
+        SERVICE: obu
+    environment:
+      - OBU_WS_URL=ws://receiver:30000/ws
 
 volumes:
   kafka-data:
