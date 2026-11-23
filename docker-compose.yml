@@ -50,9 +50,6 @@ services:
     restart: unless-stopped
     ports:
       - "9091:9090"
-    # Go-сервисы работают на хосте, а не в Docker: так Prometheus достучится до них
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
       - ./.config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -129,6 +126,9 @@ services:
       context: .
       args:
         SERVICE: obu
+    depends_on: 
+      - receiver
+    restart: on-failure
     environment:
       - OBU_WS_URL=ws://receiver:30000/ws
 
