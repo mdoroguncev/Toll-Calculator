@@ -94,8 +94,8 @@ services:
       - AGG_STORE_TYPE=postgres
       - AGG_DB_DSN=postgres://toll:toll@postgres:5432/toll?sslmode=disable
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   receiver:
     build:
@@ -131,6 +131,18 @@ services:
         SERVICE: obu
     environment:
       - OBU_WS_URL=ws://receiver:30000/ws
+
+  migrate:
+    image: ghcr.io/pressly/goose:v3.30.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations:ro
+    environment:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: "postgres://toll:toll@postgres:5432/toll?sslmode=disable"
+    command: ["-dir", "/migrations", "up"]
 
 volumes:
   kafka-data:
