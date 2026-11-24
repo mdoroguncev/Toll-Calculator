@@ -20,9 +20,9 @@ func TestHaversine(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := haversine(tt.a, tt.b)
+			got := DistanceKm(tt.a, tt.b)
 			if math.Abs(got-tt.want) > 0.5 {
-				t.Errorf("haversine(%v, %v) = %.2f km, want %.2f km", tt.a, tt.b, got, tt.want)
+				t.Errorf("DistanceKm(%v, %v) = %.2f km, want %.2f km", tt.a, tt.b, got, tt.want)
 			}
 		})
 	}

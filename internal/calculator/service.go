@@ -36,12 +36,12 @@ func (s *service) CalculateDistance(data types.OBUData) (float64, error) {
 		return 0.0, nil
 	}
 
-	distance := haversine(prev, cur)
+	distance := DistanceKm(prev, cur)
 
 	return distance, nil
 }
 
-func haversine(a, b Point) float64 {
+func DistanceKm(a, b Point) float64 {
 	const earthRadiusKm = 6371.0
 
 	// Переводим градусы в радианы
