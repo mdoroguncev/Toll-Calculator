@@ -9,6 +9,8 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/mdoroguncev/toll-calculator/internal/aggregator/client"
 	"github.com/mdoroguncev/toll-calculator/internal/types"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 type Consumer struct {
@@ -16,6 +18,18 @@ type Consumer struct {
 	calcService Service
 	aggClient   client.Client
 }
+
+var (
+	messagesConsumeCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "calculator_messages_consumed_total",
+	})
+	distanceSentCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "calculator_distances_sent_total",
+	})
+	aggregateErrorsCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "calculator_aggregate_errors_total",
+	})
+)
 
 func NewConsumer(brokers, topic, group string, svc Service, aggClient client.Client) (*Consumer, error) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
@@ -58,6 +72,7 @@ func (c *Consumer) readMessageLoop(ctx context.Context) {
 			slog.Error("kafka consume error", "err", err)
 			continue
 		}
+		messagesConsumeCounter.Inc()
 		var data types.OBUData
 		if err := json.Unmarshal(msg.Value, &data); err != nil {
 			slog.Error("JSON serialization error", "err", err)
@@ -74,8 +89,10 @@ func (c *Consumer) readMessageLoop(ctx context.Context) {
 			OBUID: data.OBUID,
 		}
 		if err := c.aggClient.Aggregate(ctx, req); err != nil {
+			aggregateErrorsCounter.Inc()
 			slog.Error("aggregate error", "err", err)
 			continue
 		}
+		distanceSentCounter.Inc()
 	}
 }

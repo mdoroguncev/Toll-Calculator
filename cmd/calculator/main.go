@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,6 +12,7 @@ import (
 	"github.com/mdoroguncev/toll-calculator/internal/aggregator/client"
 	"github.com/mdoroguncev/toll-calculator/internal/calculator"
 	"github.com/mdoroguncev/toll-calculator/internal/config"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -43,6 +45,16 @@ func main() {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+
+	go func() {
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", promhttp.Handler())
+		slog.Info("starting metrics server", "addr", ":4001")
+
+		if err := http.ListenAndServe(":4001", mux); err != nil && err != http.ErrServerClosed {
+			slog.Error("metrics server failed", "err", err)
+		}
+	}()
 
 	kafkaConsumer.Start(ctx)
 	if err := kafkaConsumer.Close(); err != nil {
