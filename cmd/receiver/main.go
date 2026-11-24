@@ -13,6 +13,7 @@ import (
 
 	"github.com/mdoroguncev/toll-calculator/internal/config"
 	"github.com/mdoroguncev/toll-calculator/internal/receiver"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -33,6 +34,7 @@ func main() {
 	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", recv.HandleWS)
+	mux.Handle("/metrics", promhttp.Handler())
 	slog.Info("receiver started", "addr", listenAddr, "kafka", kafkaBrokers, "topic", kafkaTopic)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

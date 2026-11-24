@@ -8,6 +8,19 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/mdoroguncev/toll-calculator/internal/types"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+)
+
+var (
+	receiverPointsCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "receiver_points_received_total",
+		Help: "Number of GPS points received over WebSocket.",
+	})
+	receiverKafkaEnqueueErrors = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "receiver_kafka_enqueue_errors_total",
+		Help: "Number of errors while enqueueing GPS points for Kafka.",
+	})
 )
 
 type Receiver struct {
@@ -65,8 +78,11 @@ func (dr *Receiver) wsReceiverLoop(conn *websocket.Conn) {
 			}
 			return
 		}
+		receiverPointsCounter.Inc()
+
 		data.RequestID = rand.IntN(math.MaxInt)
 		if err := dr.produceData(data); err != nil {
+			receiverKafkaEnqueueErrors.Inc()
 			slog.Error("kafka produce error", "err", err)
 		}
 	}

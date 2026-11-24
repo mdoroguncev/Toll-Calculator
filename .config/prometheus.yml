@@ -3,6 +3,11 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
+  - job_name: "receiver"
+    scrape_interval: 5s
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["receiver:30000"]
   - job_name: "aggregator"
     scrape_interval: 5s
     metrics_path: /metrics
