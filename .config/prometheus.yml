@@ -18,3 +18,8 @@ scrape_configs:
     metrics_path: /metrics
     static_configs:
       - targets: ["calculator:4001"]
+  - job_name: "gateway"
+    scrape_interval: 5s
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["gateway:6000"]
