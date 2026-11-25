@@ -5,6 +5,7 @@ import (
 	"log"
 	"log/slog"
 	"math/rand"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,7 +15,14 @@ import (
 	"github.com/mdoroguncev/toll-calculator/internal/calculator"
 	"github.com/mdoroguncev/toll-calculator/internal/config"
 	"github.com/mdoroguncev/toll-calculator/internal/types"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
+
+var sentPointsCounter = promauto.NewCounter(prometheus.CounterOpts{
+	Name: "obu_points_sent_total",
+})
 
 var route = [2]calculator.Point{
 	{Lat: 55.7500, Long: 37.6100},
@@ -92,6 +100,16 @@ func main() {
 	defer ticker.Stop()
 	var elapsed time.Duration // Первый пакет содержит стартовые координаты.
 
+	go func() {
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", promhttp.Handler())
+		slog.Info("starting metrics server", "addr", ":4002")
+
+		if err := http.ListenAndServe(":4002", mux); err != nil && err != http.ErrServerClosed {
+			slog.Error("metrics server failed", "err", err)
+		}
+	}()
+
 	for {
 		for i := range vehicles {
 			v := &vehicles[i]
@@ -105,7 +123,7 @@ func main() {
 				if err := conn.WriteJSON(data); err != nil {
 					log.Fatal(err)
 				}
-
+				sentPointsCounter.Inc()
 			}
 		}
 		select {

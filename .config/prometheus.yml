@@ -23,3 +23,8 @@ scrape_configs:
     metrics_path: /metrics
     static_configs:
       - targets: ["gateway:6000"]
+  - job_name: "obu"
+    scrape_interval: 5s
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["obu:4002"]
